@@ -1,6 +1,4 @@
-Berikut adalah draf narasi perkenalan untuk sistem CARIK. Dokumen ini disusun dengan nada profesional, namun tetap memiliki sentuhan nilai budaya yang kuat agar mudah diterima oleh seluruh jajaran pengguna.
-
-Profil Sistem: CARIK
+CARIK
 “Transformasi Tradisi dalam Inovasi Digital”
 1. Penjelasan Singkat
 CARIK (Cloud Administration Record & Information Korespondensi) adalah platform integrasi persuratan dan administrasi digital yang dirancang untuk mengotomatisasi seluruh alur korespondensi di lingkungan kerja. Sebagai evolusi dari Sistem Informasi Persuratan Digital (SIPD), CARIK hadir sebagai asisten administrasi pintar yang memastikan setiap informasi terkirim, tercatat, dan tersimpan secara aman di dalam ekosistem cloud.
