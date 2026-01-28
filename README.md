@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 # CARIK
 ### Cloud Administration Record & Information Korespondensi
 **"Transformasi Tradisi dalam Inovasi Digital"**
