@@ -45,22 +45,7 @@ CARIK adalah jembatan antara nilai integritas masa lalu dan efisiensi masa depan
 ## 6. Harapan
 Implementasi CARIK diharapkan mampu menciptakan ekosistem *paperless* yang ramah lingkungan, memastikan akurasi data yang presisi, dan menjadi standar baru dalam tata kelola administrasi modern.
 
-<<<<<<< HEAD
+
 ---
 © 2026 CARIK Project. All rights reserved.
 =======
-4. Fungsi Utama CARIK
-CARIK dirancang sebagai solusi all-in-one untuk berbagai kebutuhan administratif:
-
-Pencatatan Surat-Menyurat: Manajemen surat masuk dan keluar secara otomatis, termasuk penomoran digital dan tanda tangan elektronik.
-
-Pengajuan Laporan: Memfasilitasi pelaporan kinerja secara berkala yang lebih transparan dan mudah dipantau.
-
-Pengajuan Permintaan: Alur permohonan logistik, izin, atau sumber daya lainnya menjadi lebih singkat dan terpantau statusnya.
-
-Pencatatan Agenda: Sinkronisasi jadwal kegiatan instansi agar tidak terjadi benturan agenda antar divisi.
-
-Logbook Digital: Mencatat setiap aktivitas administratif secara kronologis untuk kebutuhan audit internal.
-
-5. Kesimpulan
-CARIK adalah jembatan yang menghubungkan nilai integritas masa lalu dengan efisiensi masa depan. Ia bukan sekadar aplikasi, melainkan budaya kerja baru yang lebih bersih, cepat, dan terorganisir. Dengan CARIK, administrasi yang rumit diubah menjadi urusan yang sederhana.
