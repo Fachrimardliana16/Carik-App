@@ -176,6 +176,11 @@ class DisposisiResource extends Resource
                     ->date('d M Y')
                     ->sortable()
                     ->toggleable(),
+                Tables\Columns\TextColumn::make('catatan_pengembalian')
+                    ->label('Alasan Kembali')
+                    ->limit(30)
+                    ->tooltip(fn ($record) => $record->catatan_pengembalian)
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('dibaca_pada')
                     ->label('Dibaca')
                     ->dateTime('d M Y H:i')
@@ -221,6 +226,30 @@ class DisposisiResource extends Resource
                     Tables\Actions\ViewAction::make(),
                     Tables\Actions\EditAction::make(),
                     
+                    Tables\Actions\Action::make('kembalikan')
+                        ->label('Kembalikan')
+                        ->icon('heroicon-o-arrow-path')
+                        ->color('warning')
+                        ->form([
+                            Forms\Components\Textarea::make('catatan_pengembalian')
+                                ->label('Alasan Pengembalian')
+                                ->required(),
+                        ])
+                        ->visible(fn ($record) => $record->kepada_user_id === auth()->id() && $record->status !== 'Selesai')
+                        ->action(function (Disposisi $record, array $data) {
+                            $record->update([
+                                'status' => 'Pending', // Or add a 'Dikembalikan' status
+                                'catatan_pengembalian' => $data['catatan_pengembalian'],
+                            ]);
+                            
+                            // Notify the sender
+                            \Filament\Notifications\Notification::make()
+                                ->title('Disposisi Dikembalikan')
+                                ->body('Alasan: ' . $data['catatan_pengembalian'])
+                                ->warning()
+                                ->sendToDatabase($record->dariUser);
+                        }),
+
                     Tables\Actions\Action::make('download')
                         ->label('Cetak Disposisi')
                         ->icon('heroicon-o-printer')
@@ -236,9 +265,23 @@ class DisposisiResource extends Resource
                     Tables\Actions\DeleteBulkAction::make(),
                     Tables\Actions\RestoreBulkAction::make(),
                     Tables\Actions\ForceDeleteBulkAction::make(),
+                    Tables\Actions\BulkAction::make('export_pdf')
+                        ->label('Export ke PDF')
+                        ->icon('heroicon-o-document-arrow-down')
+                        ->color('success')
+                        ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
+                            // Logic to export these $records as PDF
+                        }),
                 ]),
             ])
             ->defaultSort('created_at', 'desc');
+    }
+
+    public static function getWidgets(): array
+    {
+        return [
+            DisposisiResource\Widgets\DisposisiStats::class,
+        ];
     }
 
     public static function getRelations(): array

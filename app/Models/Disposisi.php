@@ -23,6 +23,7 @@ class Disposisi extends Model
         'dibaca_pada',
         'selesai_pada',
         'catatan_penyelesaian',
+        'catatan_pengembalian',
     ];
 
     protected $casts = [

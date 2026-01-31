@@ -16,4 +16,11 @@ class ListTembusans extends ListRecords
             Actions\CreateAction::make(),
         ];
     }
+
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            TembusanResource\Widgets\TembusanStats::class,
+        ];
+    }
 }

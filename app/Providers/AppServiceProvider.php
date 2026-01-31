@@ -28,5 +28,9 @@ class AppServiceProvider extends ServiceProvider
         \Illuminate\Support\Facades\Gate::policy(\App\Models\ArsipDigital::class, \App\Policies\ArsipDigitalPolicy::class);
         \Illuminate\Support\Facades\Gate::policy(\App\Models\Splaner::class, \App\Policies\SplanerPolicy::class);
         \Illuminate\Support\Facades\Gate::policy(\Spatie\Activitylog\Models\Activity::class, \App\Policies\ActivityPolicy::class);
+
+        \Illuminate\Support\Facades\Gate::before(function ($user, $ability) {
+            return $user->hasRole('super_admin') ? true : null;
+        });
     }
 }

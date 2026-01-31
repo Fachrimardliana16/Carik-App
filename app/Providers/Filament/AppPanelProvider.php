@@ -26,7 +26,7 @@ class AppPanelProvider extends PanelProvider
         return $panel
             ->id('app')
             ->path('app')
-            // Login handled by Admin Panel
+            ->login(\App\Filament\Pages\Auth\Login::class)
             ->brandName(fn () => SettingsService::getCompanyName())
             ->brandLogo(fn () => SettingsService::getLogoLight())
             ->darkModeBrandLogo(fn () => SettingsService::getLogoDark() ?? SettingsService::getLogoLight())
@@ -71,7 +71,7 @@ class AppPanelProvider extends PanelProvider
                     ->label('Panel Admin')
                     ->url('/admin')
                     ->icon('heroicon-o-cog-6-tooth')
-                    ->visible(fn (): bool => auth()->user()->hasRole(['super_admin', 'operator'])),
+                    ->visible(fn (): bool => auth()->user()->hasRole(['super_admin', 'admin'])),
             ]);
     }
 }

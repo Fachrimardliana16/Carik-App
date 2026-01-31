@@ -30,4 +30,14 @@ class Splaner extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
+
+    public function suratMasuk()
+    {
+        return $this->belongsTo(SuratMasuk::class);
+    }
+
+    public function suratKeluar()
+    {
+        return $this->belongsTo(SuratKeluar::class);
+    }
 }

@@ -5,6 +5,7 @@ namespace App\Services;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\SuratKeluar;
 use App\Models\Disposisi;
+use App\Models\Notulensi;
 use Illuminate\Support\Facades\Storage;
 
 class PdfService
@@ -46,9 +47,53 @@ class PdfService
             ],
         ]);
 
-        $pdf->setPaper('a4', 'portrait'); // Or 'a5' landscape commonly used for disposisi
+        $pdf->setPaper('a4', 'portrait');
 
         return $pdf->stream('Disposisi-' . $disposisi->id . '.pdf');
+    }
+
+    /**
+     * Generate PDF for Splaner Report (All Upcoming)
+     */
+    public static function printSplanerReport()
+    {
+        $agendas = \App\Models\Splaner::where('start_time', '>=', now())
+            ->orderBy('start_time', 'asc')
+            ->get();
+
+        $pdf = Pdf::loadView('pdf.splaner-report', [
+            'agendas' => $agendas,
+            'company' => [
+                'name' => SettingsService::getCompanyName(),
+                'address' => SettingsService::get('company_address'),
+                'logo' => self::getLogoBase64(),
+            ],
+        ]);
+
+        $pdf->setPaper('a4', 'portrait');
+
+        return $pdf->stream('Report-Agenda-' . date('Ymd') . '.pdf');
+    }
+
+    /**
+     * Generate PDF for Notulensi
+     */
+    public static function printNotulensi(Notulensi $notulensi)
+    {
+        $pdf = Pdf::loadView('pdf.notulensi', [
+            'notulensi' => $notulensi,
+            'company' => [
+                'name' => SettingsService::getCompanyName(),
+                'address' => SettingsService::get('company_address'),
+                'phone' => SettingsService::get('company_phone'),
+                'email' => SettingsService::get('company_email'),
+                'logo' => self::getLogoBase64(),
+            ],
+        ]);
+
+        $pdf->setPaper('a4', 'portrait');
+
+        return $pdf->stream('Notulensi-' . $notulensi->tanggal->format('Ymd') . '.pdf');
     }
 
     /**

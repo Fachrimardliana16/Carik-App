@@ -23,6 +23,8 @@ class SuratMasuk extends Model
         'status',
         'isi_ringkas',
         'file_path',
+        'klasifikasi_arsip_id',
+        'status_surat_id',
     ];
 
     protected $casts = [
@@ -41,5 +43,20 @@ class SuratMasuk extends Model
     public function disposisis()
     {
         return $this->hasMany(Disposisi::class);
+    }
+
+    public function klasifikasiArsip()
+    {
+        return $this->belongsTo(KlasifikasiArsip::class);
+    }
+
+    public function statusSurat()
+    {
+        return $this->belongsTo(StatusSurat::class);
+    }
+
+    public function splaners()
+    {
+        return $this->hasMany(Splaner::class);
     }
 }

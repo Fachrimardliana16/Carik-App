@@ -17,21 +17,33 @@ class TembusanResource extends Resource
     protected static ?string $navigationGroup = 'Buku Bantu';
     protected static ?int $navigationSort = 1;
 
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count() ?: null;
+    }
+
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('nama_tujuan')
-                    ->label('Nama Jabatan / Instansi')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('alamat')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('email')
-                    ->email()
-                    ->maxLength(255),
-                Forms\Components\Textarea::make('keterangan')
-                    ->columnSpanFull(),
+                Forms\Components\Section::make('Informasi Kontak Tembusan')
+                    ->schema([
+                        Forms\Components\Grid::make(3)
+                            ->schema([
+                                Forms\Components\TextInput::make('nama_tujuan')
+                                    ->label('Nama Jabatan / Instansi')
+                                    ->required()
+                                    ->maxLength(255),
+                                Forms\Components\TextInput::make('alamat')
+                                    ->maxLength(255),
+                                Forms\Components\TextInput::make('email')
+                                    ->email()
+                                    ->maxLength(255),
+                            ]),
+                        Forms\Components\Textarea::make('keterangan')
+                            ->rows(3)
+                            ->columnSpanFull(),
+                    ]),
             ]);
     }
 
@@ -40,17 +52,43 @@ class TembusanResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('nama_tujuan')
+                    ->label('Nama Jabatan / Instansi')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->weight(\Filament\Support\Enums\FontWeight::Bold),
                 Tables\Columns\TextColumn::make('alamat')
-                    ->searchable(),
+                    ->label('Alamat')
+                    ->searchable()
+                    ->limit(40),
                 Tables\Columns\TextColumn::make('email')
+                    ->label('Email')
                     ->searchable(),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\DeleteAction::make(),
+                ]),
+            ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\BulkAction::make('export_pdf')
+                        ->label('Export ke PDF')
+                        ->icon('heroicon-o-document-arrow-down')
+                        ->color('success')
+                        ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
+                            // Logic to export these $records as PDF
+                        }),
+                ]),
             ]);
+    }
+
+    public static function getWidgets(): array
+    {
+        return [
+            TembusanResource\Widgets\TembusanStats::class,
+        ];
     }
 
     public static function getPages(): array

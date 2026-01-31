@@ -16,4 +16,11 @@ class ListArsipDigitals extends ListRecords
             Actions\CreateAction::make(),
         ];
     }
+
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            ArsipDigitalResource\Widgets\ArsipDigitalStats::class,
+        ];
+    }
 }

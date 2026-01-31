@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables\Columns\TextColumn;
+use Illuminate\Http\UploadedFile;
 
 class SuratMasukResource extends Resource
 {
@@ -34,13 +35,6 @@ class SuratMasukResource extends Resource
                     ->schema([
                         Forms\Components\Grid::make(2)
                             ->schema([
-                                Forms\Components\TextInput::make('nomor_surat')
-                                    ->label('Nomor Surat')
-                                    ->required()
-                                    ->unique(ignoreRecord: true)
-                                    ->maxLength(255)
-                                    ->placeholder('Contoh: 005/DK/X/2023')
-                                    ->helperText('Nomor yang tertera pada surat fisik.'),
                                 Forms\Components\TextInput::make('nomor_agenda')
                                     ->label('Nomor Agenda')
                                     ->required()
@@ -49,6 +43,22 @@ class SuratMasukResource extends Resource
                                     ->placeholder('AGD-YYYYMMDD...')
                                     ->default(fn () => 'AGD-' . date('YmdHis'))
                                     ->helperText('Nomor pencatatan sistem.'),
+                                Forms\Components\TextInput::make('nomor_surat')
+                                    ->label('Nomor Surat')
+                                    ->required()
+                                    ->unique(ignoreRecord: true)
+                                    ->maxLength(255)
+                                    ->placeholder('Contoh: 005/DK/X/2023')
+                                    ->helperText('Nomor yang tertera pada surat fisik.'),
+                                Forms\Components\Select::make('klasifikasi_arsip_id')
+                                    ->label('Klasifikasi Arsip')
+                                    ->relationship('klasifikasiArsip', 'nama')
+                                    ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->kode} - {$record->nama}")
+                                    ->searchable()
+                                    ->preload()
+                                    ->required()
+                                    ->native(false)
+                                    ->columnSpanFull(),
                             ]),
                         
                         Forms\Components\Grid::make(2)
@@ -90,17 +100,8 @@ class SuratMasukResource extends Resource
                                     ])
                                     ->required()
                                     ->native(false),
-                                Forms\Components\Select::make('status')
-                                    ->label('Status')
-                                    ->options([
-                                        'Diterima' => 'Diterima',
-                                        'Didisposisi' => 'Didisposisi',
-                                        'Diproses' => 'Diproses',
-                                        'Selesai' => 'Selesai',
-                                    ])
-                                    ->default('Diterima')
-                                    ->required()
-                                    ->native(false),
+                                Forms\Components\Hidden::make('status_surat_id')
+                                    ->default(fn () => \App\Models\StatusSurat::where('nama', 'Sent')->first()?->id ?? \App\Models\StatusSurat::where('is_default', true)->first()?->id),
                             ]),
                         Forms\Components\Textarea::make('isi_ringkas')
                             ->label('Isi Ringkas')
@@ -116,6 +117,9 @@ class SuratMasukResource extends Resource
                             ->directory('surat-masuk')
                             ->acceptedFileTypes(['application/pdf', 'image/*'])
                             ->maxSize(10240)
+                            ->saveUploadedFileUsing(function (UploadedFile $file) {
+                                return \App\Services\FileEncryptionService::encryptAndStore($file, 'surat-masuk');
+                            })
                             ->downloadable()
                             ->openable()
                             ->previewable(),
@@ -126,13 +130,18 @@ class SuratMasukResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->with(['creator', 'updater']))
+            ->modifyQueryUsing(fn (Builder $query) => $query->with(['creator', 'updater', 'klasifikasiArsip', 'statusSurat']))
             ->columns([
                 Tables\Columns\TextColumn::make('nomor_surat')
                     ->label('No. Surat')
                     ->searchable()
                     ->sortable()
                     ->weight(FontWeight::Bold),
+                Tables\Columns\TextColumn::make('klasifikasiArsip.kode')
+                    ->label('No. Reg')
+                    ->sortable()
+                    ->searchable()
+                    ->tooltip(fn ($record) => $record->klasifikasiArsip?->nama),
                 Tables\Columns\TextColumn::make('nomor_agenda')
                     ->label('No. Agenda')
                     ->searchable()
@@ -164,14 +173,10 @@ class SuratMasukResource extends Resource
                         'danger' => 'Sangat Segera',
                         'gray' => 'Rahasia',
                     ]),
-                Tables\Columns\BadgeColumn::make('status')
+                Tables\Columns\TextColumn::make('statusSurat.nama')
                     ->label('Status')
-                    ->colors([
-                        'gray' => 'Diterima',
-                        'warning' => 'Didisposisi',
-                        'primary' => 'Diproses',
-                        'success' => 'Selesai',
-                    ]),
+                    ->badge()
+                    ->color(fn ($record) => $record->statusSurat?->warna ?? 'gray'),
                 Tables\Columns\TextColumn::make('creator.name')
                     ->label('Dibuat Oleh')
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -187,14 +192,12 @@ class SuratMasukResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('status')
+                Tables\Filters\SelectFilter::make('status_surat_id')
                     ->label('Status')
-                    ->options([
-                        'Diterima' => 'Diterima',
-                        'Didisposisi' => 'Didisposisi',
-                        'Diproses' => 'Diproses',
-                        'Selesai' => 'Selesai',
-                    ]),
+                    ->relationship('statusSurat', 'nama'),
+                Tables\Filters\SelectFilter::make('klasifikasi_arsip_id')
+                    ->label('Klasifikasi')
+                    ->relationship('klasifikasiArsip', 'nama'),
                 Tables\Filters\SelectFilter::make('sifat')
                     ->label('Sifat')
                     ->options([
@@ -227,6 +230,139 @@ class SuratMasukResource extends Resource
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\ViewAction::make(),
                     Tables\Actions\EditAction::make(),
+                    Tables\Actions\Action::make('terima')
+                        ->label('Terima')
+                        ->icon('heroicon-o-check-circle')
+                        ->color('success')
+                        ->visible(fn ($record) => $record->statusSurat?->nama === 'Draft')
+                        ->form([
+                            Forms\Components\Select::make('klasifikasi_arsip_id')
+                                ->label('Klasifikasi Arsip')
+                                ->relationship('klasifikasiArsip', 'nama')
+                                ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->kode} - {$record->nama}")
+                                ->searchable()
+                                ->preload()
+                                ->required(),
+                            Forms\Components\Select::make('sifat')
+                                ->label('Sifat Surat')
+                                ->options([
+                                    'Biasa' => 'Biasa',
+                                    'Segera' => 'Segera',
+                                    'Sangat Segera' => 'Sangat Segera',
+                                    'Rahasia' => 'Rahasia',
+                                ])
+                                ->required(),
+                            Forms\Components\Select::make('status_surat_id')
+                                ->label('Status Baru')
+                                ->relationship('statusSurat', 'nama')
+                                ->default(fn () => \App\Models\StatusSurat::where('nama', '!=', 'Draft')->where('is_default', true)->first()?->id)
+                                ->required(),
+                        ])
+                        ->action(function (SuratMasuk $record, array $data) {
+                            $record->update($data);
+                            \Filament\Notifications\Notification::make()
+                                ->title('Surat Berhasil Diterima')
+                                ->success()
+                                ->send();
+                        }),
+                    Tables\Actions\Action::make('tolak')
+                        ->label('Tolak')
+                        ->icon('heroicon-o-x-circle')
+                        ->color('danger')
+                        ->visible(fn ($record) => $record->statusSurat?->nama === 'Draft')
+                        ->requiresConfirmation()
+                        ->action(function (SuratMasuk $record) {
+                            $statusArchived = \App\Models\StatusSurat::where('nama', 'Archived')->first();
+                            $record->update([
+                                'status_surat_id' => $statusArchived?->id,
+                                'status' => 'Selesai',
+                            ]);
+                            \Filament\Notifications\Notification::make()
+                                ->title('Surat Ditolak & Diarsipkan')
+                                ->danger()
+                                ->send();
+                        }),
+                    Tables\Actions\Action::make('buat_disposisi')
+                        ->label('Buat Disposisi')
+                        ->icon('heroicon-o-paper-airplane')
+                        ->color('primary')
+                        ->form([
+                            Forms\Components\Select::make('kepada_user_id')
+                                ->label('Tujuan Disposisi')
+                                ->relationship('disposisis.kepadaUser', 'name')
+                                ->searchable()
+                                ->preload()
+                                ->required(),
+                            Forms\Components\Textarea::make('instruksi')
+                                ->label('Instruksi')
+                                ->required(),
+                            Forms\Components\Select::make('prioritas')
+                                ->label('Prioritas')
+                                ->options([
+                                    'Biasa' => 'Biasa',
+                                    'Penting' => 'Penting',
+                                    'Segera' => 'Segera',
+                                    'Sangat Segera' => 'Sangat Segera',
+                                ])
+                                ->default('Biasa')
+                                ->required(),
+                            Forms\Components\DatePicker::make('batas_waktu')
+                                ->label('Batas Waktu'),
+                        ])
+                        ->action(function (SuratMasuk $record, array $data) {
+                            $record->disposisis()->create([
+                                'dari_user_id' => auth()->id(),
+                                'kepada_user_id' => $data['kepada_user_id'],
+                                'instruksi' => $data['instruksi'],
+                                'prioritas' => $data['prioritas'],
+                                'batas_waktu' => $data['batas_waktu'],
+                                'status' => 'Pending',
+                            ]);
+                            \Filament\Notifications\Notification::make()
+                                ->title('Disposisi Berhasil Dibuat')
+                                ->success()
+                                ->send();
+                        }),
+                    Tables\Actions\Action::make('buat_jadwal')
+                        ->label('Buat Jadwal (Planer)')
+                        ->icon('heroicon-o-calendar')
+                        ->color('warning')
+                        ->visible(fn ($record) => !$record->splaners()->exists())
+                        ->form([
+                            Forms\Components\TextInput::make('title')
+                                ->label('Judul Kegiatan')
+                                ->default(fn ($record) => $record->perihal)
+                                ->required(),
+                            Forms\Components\DateTimePicker::make('start_time')
+                                ->label('Waktu Mulai')
+                                ->required(),
+                            Forms\Components\DateTimePicker::make('end_time')
+                                ->label('Waktu Selesai')
+                                ->required(),
+                            Forms\Components\TextInput::make('location')
+                                ->label('Lokasi'),
+                        ])
+                        ->action(function (SuratMasuk $record, array $data) {
+                            $record->splaners()->create([
+                                'title' => $data['title'],
+                                'start_time' => $data['start_time'],
+                                'end_time' => $data['end_time'],
+                                'location' => $data['location'],
+                                'user_id' => auth()->id(),
+                                'status' => 'Dijadwalkan',
+                            ]);
+                            \Filament\Notifications\Notification::make()
+                                ->title('Jadwal Berhasil Ditambahkan ke S-Planer')
+                                ->success()
+                                ->send();
+                        }),
+                    Tables\Actions\Action::make('download_file')
+                        ->label('Download PDF')
+                        ->icon('heroicon-o-arrow-down-tray')
+                        ->color('success')
+                        ->url(fn ($record) => $record->file_path ? route('file.download', ['path' => $record->file_path]) : null)
+                        ->openUrlInNewTab()
+                        ->visible(fn ($record) => $record->file_path),
                     Tables\Actions\DeleteAction::make(),
                     Tables\Actions\RestoreAction::make(),
                     Tables\Actions\ForceDeleteAction::make(),
@@ -237,9 +373,24 @@ class SuratMasukResource extends Resource
                     Tables\Actions\DeleteBulkAction::make(),
                     Tables\Actions\RestoreBulkAction::make(),
                     Tables\Actions\ForceDeleteBulkAction::make(),
+                    Tables\Actions\BulkAction::make('export_pdf')
+                        ->label('Export ke PDF')
+                        ->icon('heroicon-o-document-arrow-down')
+                        ->color('success')
+                        ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
+                            // Logic to export these $records as PDF
+                            // For simplicity, we might need a multi-page PDF generator
+                        }),
                 ]),
             ])
             ->defaultSort('tanggal_diterima', 'desc');
+    }
+
+    public static function getWidgets(): array
+    {
+        return [
+            SuratMasukResource\Widgets\SuratMasukStats::class,
+        ];
     }
 
     public static function infolist(\Filament\Infolists\Infolist $infolist): \Filament\Infolists\Infolist
@@ -271,6 +422,33 @@ class SuratMasukResource extends Resource
                             ->view('filament.surat-timeline')
                             ->columnSpanFull(),
                     ]),
+
+                \Filament\Infolists\Components\Section::make('Daftar Disposisi')
+                    ->schema([
+                        \Filament\Infolists\Components\RepeatableEntry::make('disposisis')
+                            ->schema([
+                                \Filament\Infolists\Components\TextEntry::make('kepadaUser.name')->label('Kepada'),
+                                \Filament\Infolists\Components\TextEntry::make('instruksi')->html(),
+                                \Filament\Infolists\Components\TextEntry::make('status')->badge(),
+                                \Filament\Infolists\Components\TextEntry::make('created_at')->label('Tanggal')->dateTime(),
+                            ])
+                            ->columns(4)
+                    ])
+                    ->collapsible(),
+
+                \Filament\Infolists\Components\Section::make('Jadwal Terkait (S-Planer)')
+                    ->schema([
+                        \Filament\Infolists\Components\RepeatableEntry::make('splaners')
+                            ->schema([
+                                \Filament\Infolists\Components\TextEntry::make('title')->label('Kegiatan'),
+                                \Filament\Infolists\Components\TextEntry::make('start_time')->label('Mulai')->dateTime(),
+                                \Filament\Infolists\Components\TextEntry::make('location')->label('Lokasi'),
+                                \Filament\Infolists\Components\TextEntry::make('status')->badge(),
+                            ])
+                            ->columns(4)
+                    ])
+                    ->collapsible()
+                    ->visible(fn ($record) => $record->splaners()->exists()),
             ]);
     }
 

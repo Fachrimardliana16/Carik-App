@@ -15,7 +15,7 @@ class SuratMasukPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('view_any_surat::masuk');
+        return $user->can('view_any_app::surat::masuk');
     }
 
     /**
@@ -23,7 +23,7 @@ class SuratMasukPolicy
      */
     public function view(User $user, SuratMasuk $suratMasuk): bool
     {
-        return $user->can('view_surat::masuk');
+        return $user->can('view_app::surat::masuk');
     }
 
     /**
@@ -31,7 +31,7 @@ class SuratMasukPolicy
      */
     public function create(User $user): bool
     {
-        return $user->can('create_surat::masuk');
+        return $user->can('create_app::surat::masuk');
     }
 
     /**
@@ -39,7 +39,7 @@ class SuratMasukPolicy
      */
     public function update(User $user, SuratMasuk $suratMasuk): bool
     {
-        return $user->can('update_surat::masuk');
+        return $user->can('update_app::surat::masuk');
     }
 
     /**
@@ -47,7 +47,7 @@ class SuratMasukPolicy
      */
     public function delete(User $user, SuratMasuk $suratMasuk): bool
     {
-        return $user->can('delete_surat::masuk');
+        return $user->can('delete_app::surat::masuk');
     }
 
     /**
@@ -55,7 +55,7 @@ class SuratMasukPolicy
      */
     public function deleteAny(User $user): bool
     {
-        return $user->can('delete_any_surat::masuk');
+        return $user->can('delete_any_app::surat::masuk');
     }
 
     /**
@@ -63,7 +63,7 @@ class SuratMasukPolicy
      */
     public function forceDelete(User $user, SuratMasuk $suratMasuk): bool
     {
-        return $user->can('force_delete_surat::masuk');
+        return $user->can('force_delete_app::surat::masuk');
     }
 
     /**
@@ -71,7 +71,7 @@ class SuratMasukPolicy
      */
     public function forceDeleteAny(User $user): bool
     {
-        return $user->can('force_delete_any_surat::masuk');
+        return $user->can('force_delete_any_app::surat::masuk');
     }
 
     /**
@@ -79,7 +79,7 @@ class SuratMasukPolicy
      */
     public function restore(User $user, SuratMasuk $suratMasuk): bool
     {
-        return $user->can('restore_surat::masuk');
+        return $user->can('restore_app::surat::masuk');
     }
 
     /**
@@ -87,7 +87,7 @@ class SuratMasukPolicy
      */
     public function restoreAny(User $user): bool
     {
-        return $user->can('restore_any_surat::masuk');
+        return $user->can('restore_any_app::surat::masuk');
     }
 
     /**
@@ -95,7 +95,7 @@ class SuratMasukPolicy
      */
     public function replicate(User $user, SuratMasuk $suratMasuk): bool
     {
-        return $user->can('replicate_surat::masuk');
+        return $user->can('replicate_app::surat::masuk');
     }
 
     /**
@@ -103,6 +103,6 @@ class SuratMasukPolicy
      */
     public function reorder(User $user): bool
     {
-        return $user->can('reorder_surat::masuk');
+        return $user->can('reorder_app::surat::masuk');
     }
 }

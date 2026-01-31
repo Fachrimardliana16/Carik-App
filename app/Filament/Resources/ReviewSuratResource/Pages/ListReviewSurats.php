@@ -16,4 +16,11 @@ class ListReviewSurats extends ListRecords
             Actions\CreateAction::make(),
         ];
     }
+
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            ReviewSuratResource\Widgets\ReviewSuratStats::class,
+        ];
+    }
 }

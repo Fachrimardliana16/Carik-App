@@ -11,8 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('surat_tables', function (Blueprint $table) {
-            //
+        Schema::table('surat_masuks', function (Blueprint $table) {
+            $table->foreignId('klasifikasi_arsip_id')->nullable()->constrained('klasifikasi_arsips')->nullOnDelete();
+            $table->foreignId('status_surat_id')->nullable()->constrained('status_surats')->nullOnDelete();
+        });
+
+        Schema::table('surat_keluars', function (Blueprint $table) {
+            $table->foreignId('klasifikasi_arsip_id')->nullable()->constrained('klasifikasi_arsips')->nullOnDelete();
+            $table->foreignId('status_surat_id')->nullable()->constrained('status_surats')->nullOnDelete();
         });
     }
 
@@ -21,8 +27,14 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('surat_tables', function (Blueprint $table) {
-            //
+        Schema::table('surat_masuks', function (Blueprint $table) {
+            $table->dropConstrainedForeignId('klasifikasi_arsip_id');
+            $table->dropConstrainedForeignId('status_surat_id');
+        });
+
+        Schema::table('surat_keluars', function (Blueprint $table) {
+            $table->dropConstrainedForeignId('klasifikasi_arsip_id');
+            $table->dropConstrainedForeignId('status_surat_id');
         });
     }
 };

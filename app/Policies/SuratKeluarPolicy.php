@@ -15,7 +15,7 @@ class SuratKeluarPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('view_any_surat::keluar');
+        return $user->can('view_any_app::surat::keluar');
     }
 
     /**
@@ -23,7 +23,7 @@ class SuratKeluarPolicy
      */
     public function view(User $user, SuratKeluar $suratKeluar): bool
     {
-        return $user->can('view_surat::keluar');
+        return $user->can('view_app::surat::keluar');
     }
 
     /**
@@ -31,7 +31,7 @@ class SuratKeluarPolicy
      */
     public function create(User $user): bool
     {
-        return $user->can('create_surat::keluar');
+        return $user->can('create_app::surat::keluar');
     }
 
     /**
@@ -39,7 +39,7 @@ class SuratKeluarPolicy
      */
     public function update(User $user, SuratKeluar $suratKeluar): bool
     {
-        return $user->can('update_surat::keluar');
+        return $user->can('update_app::surat::keluar');
     }
 
     /**
@@ -47,7 +47,7 @@ class SuratKeluarPolicy
      */
     public function delete(User $user, SuratKeluar $suratKeluar): bool
     {
-        return $user->can('delete_surat::keluar');
+        return $user->can('delete_app::surat::keluar');
     }
 
     /**
@@ -55,7 +55,7 @@ class SuratKeluarPolicy
      */
     public function deleteAny(User $user): bool
     {
-        return $user->can('delete_any_surat::keluar');
+        return $user->can('delete_any_app::surat::keluar');
     }
 
     /**
@@ -63,7 +63,7 @@ class SuratKeluarPolicy
      */
     public function forceDelete(User $user, SuratKeluar $suratKeluar): bool
     {
-        return $user->can('force_delete_surat::keluar');
+        return $user->can('force_delete_app::surat::keluar');
     }
 
     /**
@@ -71,7 +71,7 @@ class SuratKeluarPolicy
      */
     public function forceDeleteAny(User $user): bool
     {
-        return $user->can('force_delete_any_surat::keluar');
+        return $user->can('force_delete_any_app::surat::keluar');
     }
 
     /**
@@ -79,7 +79,7 @@ class SuratKeluarPolicy
      */
     public function restore(User $user, SuratKeluar $suratKeluar): bool
     {
-        return $user->can('restore_surat::keluar');
+        return $user->can('restore_app::surat::keluar');
     }
 
     /**
@@ -87,7 +87,7 @@ class SuratKeluarPolicy
      */
     public function restoreAny(User $user): bool
     {
-        return $user->can('restore_any_surat::keluar');
+        return $user->can('restore_any_app::surat::keluar');
     }
 
     /**
@@ -95,7 +95,7 @@ class SuratKeluarPolicy
      */
     public function replicate(User $user, SuratKeluar $suratKeluar): bool
     {
-        return $user->can('replicate_surat::keluar');
+        return $user->can('replicate_app::surat::keluar');
     }
 
     /**
@@ -103,6 +103,6 @@ class SuratKeluarPolicy
      */
     public function reorder(User $user): bool
     {
-        return $user->can('reorder_surat::keluar');
+        return $user->can('reorder_app::surat::keluar');
     }
 }

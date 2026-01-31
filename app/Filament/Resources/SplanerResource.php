@@ -20,24 +20,58 @@ class SplanerResource extends Resource
     protected static ?string $navigationLabel = 'S-Planer (Agenda)';
     protected static ?int $navigationSort = 1;
 
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::whereDate('start_time', now())->count() ?: null;
+    }
+
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return 'info';
+    }
+
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('title')->required(),
-                Forms\Components\DateTimePicker::make('start_time')->required(),
-                Forms\Components\DateTimePicker::make('end_time')->required(),
-                Forms\Components\TextInput::make('location'),
-                Forms\Components\Select::make('status')
-                    ->options([
-                        'Dijadwalkan' => 'Dijadwalkan',
-                        'Selesai' => 'Selesai',
-                        'Dibatalkan' => 'Dibatalkan',
-                    ])->default('Dijadwalkan')->required(),
-                Forms\Components\Textarea::make('description')
-                    ->columnSpanFull()
-                    ->placeholder('Detail kegiatan, link meeting, atau catatan lainnya...'),
-                Forms\Components\Hidden::make('user_id')->default(Auth::id()),
+                Forms\Components\Section::make('Detail Agenda')
+                    ->schema([
+                        Forms\Components\Grid::make(2)
+                            ->schema([
+                                Forms\Components\TextInput::make('title')
+                                    ->label('Judul Kegiatan')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->columnSpanFull(),
+                                Forms\Components\DateTimePicker::make('start_time')
+                                    ->label('Waktu Mulai')
+                                    ->required()
+                                    ->native(false),
+                                Forms\Components\DateTimePicker::make('end_time')
+                                    ->label('Waktu Selesai')
+                                    ->required()
+                                    ->native(false),
+                                Forms\Components\TextInput::make('location')
+                                    ->label('Lokasi')
+                                    ->maxLength(255),
+                                Forms\Components\Select::make('status')
+                                    ->options([
+                                        'Dijadwalkan' => 'Dijadwalkan',
+                                        'Selesai' => 'Selesai',
+                                        'Dibatalkan' => 'Dibatalkan',
+                                    ])
+                                    ->default('Dijadwalkan')
+                                    ->required()
+                                    ->native(false),
+                            ]),
+                        Forms\Components\Textarea::make('description')
+                            ->label('Deskripsi / Catatan')
+                            ->rows(4)
+                            ->columnSpanFull()
+                            ->placeholder('Detail kegiatan, link meeting, atau catatan lainnya...'),
+                        Forms\Components\Hidden::make('user_id')
+                            ->default(Auth::id()),
+                    ]),
             ]);
     }
 
@@ -45,10 +79,23 @@ class SplanerResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('title')->searchable(),
-                Tables\Columns\TextColumn::make('start_time')->dateTime()->sortable(),
-                Tables\Columns\TextColumn::make('end_time')->dateTime(),
-                Tables\Columns\TextColumn::make('location')->searchable(),
+                Tables\Columns\TextColumn::make('title')
+                    ->label('Judul Kegiatan')
+                    ->searchable()
+                    ->sortable()
+                    ->weight(\Filament\Support\Enums\FontWeight::Bold),
+                Tables\Columns\TextColumn::make('start_time')
+                    ->label('Waktu Mulai')
+                    ->dateTime('d M Y H:i')
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('end_time')
+                    ->label('Waktu Selesai')
+                    ->dateTime('d M Y H:i')
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('location')
+                    ->label('Lokasi')
+                    ->searchable()
+                    ->limit(30),
                 Tables\Columns\BadgeColumn::make('status')
                     ->colors([
                         'primary' => 'Dijadwalkan',
@@ -57,9 +104,70 @@ class SplanerResource extends Resource
                     ]),
             ])
             ->defaultSort('start_time', 'asc')
+            ->recordAction(Tables\Actions\ViewAction::class)
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\ViewAction::make(),
+                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\Action::make('mark_as_selesai')
+                        ->label('Selesai')
+                        ->icon('heroicon-o-check-badge')
+                        ->color('success')
+                        ->visible(fn ($record) => $record->status === 'Dijadwalkan')
+                        ->action(function (Splaner $record) {
+                            $record->update(['status' => 'Selesai']);
+                            \Filament\Notifications\Notification::make()
+                                ->title('Kegiatan Selesai')
+                                ->success()
+                                ->send();
+                        }),
+                    Tables\Actions\DeleteAction::make(),
+                ]),
+            ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
+                ]),
+            ])
+            ->headerActions([
+                Tables\Actions\Action::make('report_pdf')
+                    ->label('Report PDF')
+                    ->icon('heroicon-o-document-chart-bar')
+                    ->color('danger')
+                    ->action(function () {
+                        return \App\Services\PdfService::printSplanerReport();
+                    })
+            ]);
+    }
+
+    public static function infolist(\Filament\Infolists\Infolist $infolist): \Filament\Infolists\Infolist
+    {
+        return $infolist
+            ->schema([
+                \Filament\Infolists\Components\Section::make('Informasi Kegiatan')
+                    ->schema([
+                        \Filament\Infolists\Components\TextEntry::make('title')->label('Judul Kegiatan'),
+                        \Filament\Infolists\Components\TextEntry::make('location')->label('Lokasi'),
+                        \Filament\Infolists\Components\TextEntry::make('start_time')->label('Mulai')->dateTime('d M Y H:i'),
+                        \Filament\Infolists\Components\TextEntry::make('end_time')->label('Selesai')->dateTime('d M Y H:i'),
+                        \Filament\Infolists\Components\TextEntry::make('status')
+                            ->badge()
+                            ->colors([
+                                'primary' => 'Dijadwalkan',
+                                'success' => 'Selesai',
+                                'danger' => 'Dibatalkan',
+                            ]),
+                        \Filament\Infolists\Components\TextEntry::make('description')
+                            ->label('Keterangan')
+                            ->columnSpanFull()
+                            ->html(),
+                        \Filament\Infolists\Components\TextEntry::make('suratMasuk.nomor_surat')
+                            ->label('Terkait Surat Masuk')
+                            ->visible(fn ($record) => $record->surat_masuk_id !== null),
+                        \Filament\Infolists\Components\TextEntry::make('suratKeluar.nomor_surat')
+                            ->label('Terkait Surat Keluar')
+                            ->visible(fn ($record) => $record->surat_keluar_id !== null),
+                    ])->columns(2),
             ]);
     }
 
@@ -76,6 +184,7 @@ class SplanerResource extends Resource
     {
         return [
             SplanerCalendarWidget::class,
+            SplanerResource\Widgets\SplanerStats::class,
         ];
     }
 }

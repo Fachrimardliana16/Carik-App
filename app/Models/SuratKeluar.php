@@ -20,13 +20,20 @@ class SuratKeluar extends Model
         'sifat',
         'status',
         'isi_surat',
+        'tembusan',
         'file_path',
         'penandatangan_id',
         'qr_code',
+        'signature_hash',
+        'signed_at',
+        'template_id', // Added this line
+        'klasifikasi_arsip_id',
+        'status_surat_id',
     ];
 
     protected $casts = [
         'tanggal_surat' => 'date',
+        'signed_at' => 'datetime',
     ];
 
     public function getActivitylogOptions(): LogOptions
@@ -40,5 +47,25 @@ class SuratKeluar extends Model
     public function penandatangan()
     {
         return $this->belongsTo(User::class, 'penandatangan_id');
+    }
+
+    public function klasifikasiArsip()
+    {
+        return $this->belongsTo(KlasifikasiArsip::class);
+    }
+
+    public function statusSurat()
+    {
+        return $this->belongsTo(StatusSurat::class);
+    }
+
+    public function template()
+    {
+        return $this->belongsTo(TemplateSurat::class);
+    }
+
+    public function splaners()
+    {
+        return $this->hasMany(Splaner::class);
     }
 }

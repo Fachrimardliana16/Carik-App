@@ -2,7 +2,7 @@
 trigger: always_on
 ---
 
-# Project Instructions: Sistem Informasi Persuratan Digital (SIPD)
+# Project Instructions: Carik-App Digital (SIPD)
 
 ## 1. Core Architecture & Tech Stack
 - **Framework:** Laravel 11 dengan Filament v3.

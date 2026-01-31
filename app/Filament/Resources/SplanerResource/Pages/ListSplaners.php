@@ -21,6 +21,7 @@ class ListSplaners extends ListRecords
     {
         return [
             \App\Filament\Resources\SplanerResource\Widgets\SplanerCalendarWidget::class,
+            \App\Filament\Resources\SplanerResource\Widgets\SplanerStats::class,
         ];
     }
 }

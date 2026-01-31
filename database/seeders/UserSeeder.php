@@ -18,53 +18,54 @@ class UserSeeder extends Seeder
     {
         // 1. Setup Roles
         $roleSuperAdmin = Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']);
-        $roleAdmin = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']); // Admin & Sekretariat
-        $roleUser = Role::firstOrCreate(['name' => 'user', 'guard_name' => 'web']); // Staff & Heads
-
-        // Retrieve permissions securely
-        try {
-            $roleSuperAdmin->givePermissionTo(Permission::all());
-            // Give Admin & User permissions based on needs (simplified for now to basic access)
-            // Realistically, we'd assign viewing permissions here.
-        } catch (\Exception $e) {
-            // Permissions might not exist yet if fresh
-        }
+        $roleAdmin = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
+        $roleUser = Role::firstOrCreate(['name' => 'user', 'guard_name' => 'web']);
 
         $password = Hash::make('password');
 
         // 2. Seed Super Admin
-        $this->createUser('Super Admin', 'superadmin', 'superadmin@sipd.local', $roleSuperAdmin, $password);
+        $superAdmin = $this->createUser('Super Admin', 'superadmin', 'superadmin@mail.com', $roleSuperAdmin, $password);
+        
+        // Super Admin gets all permissions
+        $superAdmin->syncPermissions(Permission::all());
 
-        // 3. Seed Admins
-        $this->createUser('Administrator', 'admin', 'admin@sipd.local', $roleAdmin, $password);
-        $this->createUser('Sekretariat', 'sekretariat', 'sekretariat@sipd.local', $roleAdmin, $password);
+        // 3. Seed Admins (admin & sekretaris)
+        // Permissions for Admin: All except User, ActivityLog, Role, and CompanySettings
+        $adminPermissions = Permission::where('name', 'not like', '%user%')
+            ->where('name', 'not like', '%activity%')
+            ->where('name', 'not like', '%role%')
+            ->where('name', 'not like', '%shield%') // Shield roles
+            ->where('name', 'not like', '%setting%') // Company settings
+            ->get();
+        $roleAdmin->syncPermissions($adminPermissions);
 
-        // 4. Seed Users (Direksi, Kabag, Unit, dll)
-        $users = [
-            ['name' => 'Direktur Utama', 'username' => 'dirut'],
-            ['name' => 'Direktur Umum', 'username' => 'dirum'],
-            ['name' => 'Kepala Bagian Umum', 'username' => 'kabag_umum'],
-            ['name' => 'Kepala Bagian Keuangan', 'username' => 'kabag_keuangan'],
-            ['name' => 'Kepala Bagian Teknik', 'username' => 'kabag_teknik'],
-            ['name' => 'Kepala Bagian Hubungan Langganan', 'username' => 'kabag_hublang'],
-            ['name' => 'Kepala Bagian SPI', 'username' => 'kabag_spi'],
-            ['name' => 'Kepala Sub Bagian', 'username' => 'kasubag'],
-            ['name' => 'Kepala Cabang', 'username' => 'kacab'],
-            ['name' => 'Kepala Unit', 'username' => 'kaunit'],
-            ['name' => 'Kepala Seksi Teknik', 'username' => 'kasi_teknik'],
-            ['name' => 'Kepala Seksi Umum', 'username' => 'kasi_umum'],
-            ['name' => 'Koordinator', 'username' => 'koordinator'],
-            ['name' => 'Staff', 'username' => 'staff'],
-        ];
+        // admin@mail.com
+        $this->createUser('Administrator', 'admin', 'admin@mail.com', $roleAdmin, $password);
+        // sekretaris@mail.com
+        $this->createUser('Sekretaris', 'sekretaris', 'sekretaris@mail.com', $roleAdmin, $password);
 
-        foreach ($users as $u) {
-            $this->createUser($u['name'], $u['username'], $u['username'] . '@sipd.local', $roleUser, $password);
+        // 4. Seed Users
+        // Users can access all resources but they are scoped by Panel App logic in User.php
+        // However, we can also limit their permissions if needed. 
+        // For now, let's give them permissions for common resources.
+        $userExcluded = ['user', 'activity', 'role', 'shield', 'setting', 'audit'];
+        $userPermissions = Permission::query();
+        foreach ($userExcluded as $ex) {
+            $userPermissions->where('name', 'not like', "%{$ex}%");
         }
+        $roleUser->syncPermissions($userPermissions->get());
+
+        $this->createUser('User Satu', 'user1', 'user1@mail.com', $roleUser, $password);
+        $this->createUser('User Dua', 'user2', 'user2@mail.com', $roleUser, $password);
+
+        // 5. Scenario Specific Users
+        $this->createUser('Direktur Utama', 'direktur', 'direktur@mail.com', $roleUser, $password);
+        $this->createUser('Karyawan', 'karyawan', 'karyawan@mail.com', $roleUser, $password);
     }
 
     private function createUser($name, $username, $email, $role, $password)
     {
-        $user = User::firstOrCreate(
+        $user = User::updateOrCreate(
             ['username' => $username],
             [
                 'name' => $name,
@@ -80,5 +81,7 @@ class UserSeeder extends Seeder
         if (str_contains(strtolower($name), 'direktur') || str_contains(strtolower($name), 'kepala')) {
             DigitalSignatureService::generateKeyPair($user);
         }
+
+        return $user;
     }
 }

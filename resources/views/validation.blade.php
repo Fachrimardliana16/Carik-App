@@ -92,7 +92,7 @@
         <!-- Footer -->
         <div class="bg-gray-50 p-6 text-center text-xs text-gray-400 border-t border-gray-100">
             &copy; {{ date('Y') }} {{ \App\Services\SettingsService::getCompanyName() }}. All rights reserved.<br>
-            Dicetak melalui Sistem Informasi Persuratan Digital
+            Dicetak melalui Carik-App Digital
         </div>
     </div>
 </body>

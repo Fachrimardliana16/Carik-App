@@ -5,7 +5,7 @@
 ---
 
 ## 1. Penjelasan Singkat
-**CARIK** adalah platform integrasi persuratan dan administrasi digital yang dirancang untuk mengotomatisasi alur korespondensi kerja. Sebagai evolusi dari Sistem Informasi Persuratan Digital (SIPD), CARIK berfungsi sebagai asisten administrasi pintar yang menjamin keamanan data dalam ekosistem cloud.
+**CARIK** adalah platform integrasi persuratan dan administrasi digital yang dirancang untuk mengotomatisasi alur korespondensi kerja. Sebagai evolusi dari Carik-App Digital (SIPD), CARIK berfungsi sebagai asisten administrasi pintar yang menjamin keamanan data dalam ekosistem cloud.
 
 ## 2. Latar Belakang
 Era buku agenda fisik dan tumpukan kertas telah mencapai batas efektivitasnya. Risiko surat terselip, lambatnya disposisi, serta degradasi fisik arsip menjadi hambatan nyata. 

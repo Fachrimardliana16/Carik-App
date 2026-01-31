@@ -2,46 +2,107 @@
 
 namespace App\Policies;
 
-use App\Models\ReviewSurat;
 use App\Models\User;
+use App\Models\ReviewSurat;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class ReviewSuratPolicy
 {
     use HandlesAuthorization;
 
+    /**
+     * Determine whether the user can view any models.
+     */
     public function viewAny(User $user): bool
     {
-        return $user->can('view_any_review_surat');
+        return $user->can('view_any_app::review::surat');
     }
 
+    /**
+     * Determine whether the user can view the model.
+     */
     public function view(User $user, ReviewSurat $reviewSurat): bool
     {
-        return $user->can('view_review_surat');
+        return $user->can('view_app::review::surat');
     }
 
+    /**
+     * Determine whether the user can create models.
+     */
     public function create(User $user): bool
     {
-        return $user->can('create_review_surat');
+        return $user->can('create_app::review::surat');
     }
 
+    /**
+     * Determine whether the user can update the model.
+     */
     public function update(User $user, ReviewSurat $reviewSurat): bool
     {
-        return $user->can('update_review_surat');
+        return $user->can('update_app::review::surat');
     }
 
+    /**
+     * Determine whether the user can delete the model.
+     */
     public function delete(User $user, ReviewSurat $reviewSurat): bool
     {
-        return $user->can('delete_review_surat');
+        return $user->can('delete_app::review::surat');
     }
 
-    public function restore(User $user, ReviewSurat $reviewSurat): bool
+    /**
+     * Determine whether the user can bulk delete.
+     */
+    public function deleteAny(User $user): bool
     {
-        return $user->can('restore_review_surat');
+        return $user->can('delete_any_app::review::surat');
     }
 
+    /**
+     * Determine whether the user can permanently delete.
+     */
     public function forceDelete(User $user, ReviewSurat $reviewSurat): bool
     {
-        return $user->can('force_delete_review_surat');
+        return $user->can('force_delete_app::review::surat');
+    }
+
+    /**
+     * Determine whether the user can permanently bulk delete.
+     */
+    public function forceDeleteAny(User $user): bool
+    {
+        return $user->can('force_delete_any_app::review::surat');
+    }
+
+    /**
+     * Determine whether the user can restore.
+     */
+    public function restore(User $user, ReviewSurat $reviewSurat): bool
+    {
+        return $user->can('restore_app::review::surat');
+    }
+
+    /**
+     * Determine whether the user can bulk restore.
+     */
+    public function restoreAny(User $user): bool
+    {
+        return $user->can('restore_any_app::review::surat');
+    }
+
+    /**
+     * Determine whether the user can replicate.
+     */
+    public function replicate(User $user, ReviewSurat $reviewSurat): bool
+    {
+        return $user->can('replicate_app::review::surat');
+    }
+
+    /**
+     * Determine whether the user can reorder.
+     */
+    public function reorder(User $user): bool
+    {
+        return $user->can('reorder_app::review::surat');
     }
 }

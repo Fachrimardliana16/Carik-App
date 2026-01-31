@@ -16,4 +16,11 @@ class ListSuratMasuks extends ListRecords
             Actions\CreateAction::make(),
         ];
     }
+
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            SuratMasukResource\Widgets\SuratMasukStats::class,
+        ];
+    }
 }

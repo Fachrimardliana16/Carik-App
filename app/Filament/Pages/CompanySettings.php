@@ -24,6 +24,11 @@ class CompanySettings extends Page implements HasForms
     protected static ?int $navigationSort = 99;
     protected static ?string $navigationGroup = 'Pengaturan';
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()->hasRole('super_admin');
+    }
+
     protected static string $view = 'filament.pages.company-settings';
 
     public ?array $data = [];
@@ -42,60 +47,57 @@ class CompanySettings extends Page implements HasForms
     protected function getFormSchema(): array
     {
         return [
-            Tabs::make('Settings')
-                ->tabs([
-                    Tabs\Tab::make('Umum')
+            Section::make('Informasi Umum')
+                ->description('Informasi dasar instansi / perusahaan')
+                ->schema([
+                    TextInput::make('company_name')
+                        ->label('Nama Instansi / Perusahaan')
+                        ->required()
+                        ->maxLength(255),
+                ])
+                ->collapsible(),
+
+            Section::make('Kontak Instansi')
+                ->description('Informasi ini akan digunakan pada header surat dan kop resmi')
+                ->schema([
+                    Forms\Components\Grid::make(2)
                         ->schema([
-                            Section::make('Informasi Perusahaan')
-                                ->schema([
-                                    TextInput::make('company_name')
-                                        ->label('Nama Instansi / Perusahaan')
-                                        ->required()
-                                        ->maxLength(255),
-                                ]),
+                            TextInput::make('company_phone')
+                                ->label('Telepon')
+                                ->tel(),
+                            TextInput::make('company_email')
+                                ->label('Email')
+                                ->email(),
                         ]),
-                    Tabs\Tab::make('Kontak')
+                    Textarea::make('company_address')
+                        ->label('Alamat')
+                        ->rows(3),
+                ])
+                ->collapsible(),
+
+            Section::make('Branding')
+                ->description('Logo akan ditampilkan di sidebar, login, dan kop surat. QR Code akan menggunakan brand color.')
+                ->schema([
+                    Forms\Components\Grid::make(3)
                         ->schema([
-                            Section::make('Kontak Instansi')
-                                ->description('Informasi ini akan digunakan pada header surat dan kop resmi')
-                                ->schema([
-                                    Textarea::make('company_address')
-                                        ->label('Alamat')
-                                        ->rows(3),
-                                    TextInput::make('company_phone')
-                                        ->label('Telepon')
-                                        ->tel(),
-                                    TextInput::make('company_email')
-                                        ->label('Email')
-                                        ->email(),
-                                ]),
+                            FileUpload::make('logo_light')
+                                ->label('Logo (Light Mode)')
+                                ->image()
+                                ->directory('branding'),
+                            FileUpload::make('logo_dark')
+                                ->label('Logo (Dark Mode)')
+                                ->image()
+                                ->directory('branding'),
+                            FileUpload::make('favicon')
+                                ->label('Favicon')
+                                ->image()
+                                ->directory('branding'),
                         ]),
-                    Tabs\Tab::make('Branding')
-                        ->schema([
-                            Section::make('Logo & Warna')
-                                ->description('Logo akan ditampilkan di sidebar, login, dan kop surat. QR Code akan menggunakan brand color.')
-                                ->schema([
-                                    FileUpload::make('logo_light')
-                                        ->label('Logo (Light Mode)')
-                                        ->image()
-                                        ->directory('branding')
-                                        ->imageEditor(),
-                                    FileUpload::make('logo_dark')
-                                        ->label('Logo (Dark Mode)')
-                                        ->image()
-                                        ->directory('branding')
-                                        ->imageEditor(),
-                                    FileUpload::make('favicon')
-                                        ->label('Favicon')
-                                        ->image()
-                                        ->directory('branding')
-                                        ->imageEditor(),
-                                    ColorPicker::make('primary_color')
-                                        ->label('Warna Utama (Primary Color)')
-                                        ->required(),
-                                ]),
-                        ]),
-                ]),
+                    ColorPicker::make('primary_color')
+                        ->label('Warna Utama (Primary Color)')
+                        ->required(),
+                ])
+                ->collapsible(),
         ];
     }
 

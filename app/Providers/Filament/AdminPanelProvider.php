@@ -28,7 +28,7 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
-            ->login()
+            ->login(\App\Filament\Pages\Auth\Login::class)
             ->brandName(fn () => SettingsService::getCompanyName())
             ->brandLogo(fn () => SettingsService::getLogoLight())
             ->darkModeBrandLogo(fn () => SettingsService::getLogoDark() ?? SettingsService::getLogoLight())
@@ -59,7 +59,9 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->plugins([
                 FilamentShieldPlugin::make(),
-                \Saade\FilamentFullCalendar\FilamentFullCalendarPlugin::make(),
+                \Saade\FilamentFullCalendar\FilamentFullCalendarPlugin::make()
+                    ->selectable()
+                    ->editable(),
             ])
             ->navigationGroups([
                 'Persuratan',

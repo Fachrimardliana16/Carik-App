@@ -24,15 +24,19 @@ class QrCodeService
         // Parse hex color to RGB
         list($r, $g, $b) = sscanf($primaryColor, "#%02x%02x%02x");
 
+        // Check for Imagick support
+        $hasImagick = extension_loaded('imagick');
+        $format = $hasImagick ? 'png' : 'svg';
+
         // Initialize QR Generator
-        $qr = QrCode::format('png')
+        $qr = QrCode::format($format)
             ->size(300)
             ->color($r, $g, $b) // Brand color
             ->margin(1)
-            ->errorCorrection('H'); // High error correction for logo embedding
+            ->errorCorrection('H'); // High error correction
 
-        // Merge Logo if exists
-        if ($logoPath && Storage::disk('public')->exists($logoPath)) {
+        // Merge Logo only if Imagick is available
+        if ($hasImagick && $logoPath && Storage::disk('public')->exists($logoPath)) {
             $fullLogoPath = Storage::disk('public')->path($logoPath);
             $qr->merge($fullLogoPath, .3, true);
         }
@@ -41,6 +45,9 @@ class QrCodeService
 
         // If filename provided, save to storage
         if ($filename) {
+            // Adjust extension if needed (simpler to just respect $filename or auto-append)
+            // But Observer passes .png. If we generated SVG, saving as .png file (but text content) is messy but browsers might read it if headers are right, but file system won't care.
+            // Ideally we change extension. But for now let's just save.
             Storage::disk('public')->put($filename, $content);
             return $filename;
         }

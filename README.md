@@ -8,10 +8,10 @@
 CARIK
 “Transformasi Tradisi dalam Inovasi Digital”
 
-CARIK (Cloud Administration Record & Information Korespondensi) adalah platform integrasi persuratan dan administrasi digital yang dirancang untuk mengotomatisasi seluruh alur korespondensi di lingkungan kerja. Sebagai evolusi dari Sistem Informasi Persuratan Digital (SIPD), CARIK hadir sebagai asisten administrasi pintar yang memastikan setiap informasi terkirim, tercatat, dan tersimpan secara aman di dalam ekosistem cloud.
+CARIK (Cloud Administration Record & Information Korespondensi) adalah platform integrasi persuratan dan administrasi digital yang dirancang untuk mengotomatisasi seluruh alur korespondensi di lingkungan kerja. Sebagai evolusi dari Carik-App Digital (SIPD), CARIK hadir sebagai asisten administrasi pintar yang memastikan setiap informasi terkirim, tercatat, dan tersimpan secara aman di dalam ekosistem cloud.
 
 ## 1. Penjelasan Singkat
-**CARIK** adalah platform integrasi persuratan dan administrasi digital yang dirancang untuk mengotomatisasi alur korespondensi kerja. Sebagai evolusi dari Sistem Informasi Persuratan Digital (SIPD), CARIK berfungsi sebagai asisten administrasi pintar yang menjamin keamanan data dalam ekosistem cloud.
+**CARIK** adalah platform integrasi persuratan dan administrasi digital yang dirancang untuk mengotomatisasi alur korespondensi kerja. Sebagai evolusi dari Carik-App Digital (SIPD), CARIK berfungsi sebagai asisten administrasi pintar yang menjamin keamanan data dalam ekosistem cloud.
 
 ## 2. Latar Belakang
 Era buku agenda fisik dan tumpukan kertas telah mencapai batas efektivitasnya. Risiko surat terselip, lambatnya disposisi, serta degradasi fisik arsip menjadi hambatan nyata. 
