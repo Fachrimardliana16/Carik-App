@@ -28,11 +28,13 @@ class ArsipDigitalResource extends Resource
                             ->schema([
                                 Forms\Components\TextInput::make('judul')
                                     ->required()
-                                    ->maxLength(255),
+                                    ->maxLength(255)
+                                    ->placeholder('Contoh: SK Pengangkatan Pegawai'),
                                 Forms\Components\TextInput::make('nomor_arsip')
                                     ->required()
                                     ->unique(ignoreRecord: true)
-                                    ->maxLength(255),
+                                    ->maxLength(255)
+                                    ->placeholder('Contoh: ARS-2026-001'),
                                 Forms\Components\Select::make('kategori')
                                     ->options([
                                         'SK' => 'SK',
@@ -49,6 +51,7 @@ class ArsipDigitalResource extends Resource
                             ]),
                         Forms\Components\Textarea::make('deskripsi')
                             ->rows(3)
+                            ->placeholder('Deskripsi singkat tentang isi arsip...')
                             ->columnSpanFull(),
                     ]),
                 

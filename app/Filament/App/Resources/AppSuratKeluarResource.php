@@ -29,9 +29,21 @@ class AppSuratKeluarResource extends SuratKeluarResource
             
         return parent::getEloquentQuery()
             ->where(function (Builder $query) use ($user, $delegatedIds) {
+                // Show surat created by user
                 $query->where('created_by', $user->id)
+                      // Or where user is the signatory
                       ->orWhere('penandatangan_id', $user->id)
-                      ->orWhereIn('penandatangan_id', $delegatedIds);
+                      // Or where user is delegated as signatory
+                      ->orWhereIn('penandatangan_id', $delegatedIds)
+                      // Or internal surat where user is the recipient
+                      ->orWhere(function ($q) use ($user) {
+                          $q->where('is_internal', true)
+                            ->where('tujuan_user_id', $user->id);
+                      })
+                      // Or surat with disposisi to this user
+                      ->orWhereHas('disposisis', function ($q) use ($user) {
+                          $q->where('kepada_user_id', $user->id);
+                      });
             })
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,

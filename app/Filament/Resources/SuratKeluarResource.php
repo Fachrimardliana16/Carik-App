@@ -53,11 +53,35 @@ class SuratKeluarResource extends Resource
                                             ->maxLength(255)
                                             ->default('Draft/SK/'.date('Y'))
                                             ->helperText('Nomor akan difinalisasi saat tanda tangan.'),
+                                        Forms\Components\Toggle::make('is_internal')
+                                            ->label('Tujuan Internal?')
+                                            ->reactive()
+                                            ->default(false)
+                                            ->afterStateUpdated(fn ($state, Forms\Set $set) => $state ? $set('tujuan', null) : $set('tujuan_user_id', null)),
+                                        
+                                        Forms\Components\Select::make('tujuan_user_id')
+                                            ->label('Tujuan Internal (User)')
+                                            ->options(User::pluck('name', 'id'))
+                                            ->searchable()
+                                            ->preload()
+                                            ->visible(fn (Forms\Get $get) => $get('is_internal'))
+                                            ->required(fn (Forms\Get $get) => $get('is_internal'))
+                                            ->reactive()
+                                            ->afterStateUpdated(function ($state, Forms\Set $set) {
+                                                if ($state) {
+                                                    $user = User::find($state);
+                                                    $set('tujuan', $user?->name);
+                                                }
+                                            })
+                                            ->columnSpanFull(),
+
                                         Forms\Components\TextInput::make('tujuan')
                                             ->label('Kepada Yth')
                                             ->required()
                                             ->maxLength(255)
                                             ->placeholder('Nama Pejabat / Instansi Tujuan')
+                                            ->visible(fn (Forms\Get $get) => !$get('is_internal') || $get('tujuan_user_id')) // Visible if external OR internal user selected (so you can see/edit the text)
+                                            ->readOnly(fn (Forms\Get $get) => $get('is_internal'))
                                             ->columnSpanFull(),
                                         Forms\Components\Select::make('klasifikasi_arsip_id')
                                             ->label('Klasifikasi Arsip')

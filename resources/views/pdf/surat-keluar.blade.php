@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
     <title>Surat Keluar - {{ $surat->nomor_surat }}</title>
     <style>
         body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.5; }
@@ -8,7 +9,7 @@
         .meta-table td { vertical-align: top; padding: 2px 0; }
         .signature { margin-top: 50px; float: right; width: 40%; text-align: center; }
         .qr-code { margin-top: 10px; }
-        .signature img { height: 100px; }
+        .qr-code svg { width: 100px; height: 100px; }
     </style>
 </head>
 <body>
@@ -49,7 +50,7 @@
     </div>
 
     <div class="content">
-        {!! $surat->isi_surat !!}
+        {!! mb_convert_encoding($surat->isi_surat ?? '', 'UTF-8', 'UTF-8') !!}
     </div>
 
     <div class="signature">
@@ -58,15 +59,20 @@
 
         @if($surat->qr_code && $surat->status == 'Selesai')
             <div class="qr-code">
-                <?php
-                    // Generate QR on the fly for PDF or use saved file. 
-                    // Using simple-qrcode to generate SVG/Base64 directly is easier for dompdf?
-                    // Or refer to the generated file.
-                    // Let's use QrCode facade to generate base64.
-                    $qrcode = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('png')->size(100)->generate(\App\Services\QrCodeService::getValidationUrl($surat->qr_code));
-                    $base64 = base64_encode($qrcode);
-                ?>
-                <img src="data:image/png;base64, {{ $base64 }}">
+                @php
+                    try {
+                        $validationUrl = \App\Services\QrCodeService::getValidationUrl($surat->qr_code);
+                        $qrcode = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('svg')
+                            ->size(100)
+                            ->errorCorrection('L')
+                            ->generate($validationUrl);
+                    } catch (\Exception $e) {
+                        $qrcode = null;
+                    }
+                @endphp
+                @if($qrcode)
+                    {!! $qrcode !!}
+                @endif
             </div>
             <div style="font-size: 9px; margin-top: 5px;">Dokumen ini ditandatangani secara elektronik</div>
         @else

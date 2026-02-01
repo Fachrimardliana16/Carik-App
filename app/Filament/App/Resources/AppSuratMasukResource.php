@@ -40,7 +40,7 @@ class AppSuratMasukResource extends SuratMasukResource
     {
         return [
             'index' => \App\Filament\App\Resources\AppSuratMasukResource\Pages\ListAppSuratMasuks::route('/'),
-            // 'create' => \App\Filament\App\Resources\AppSuratMasukResource\Pages\CreateAppSuratMasuk::route('/create'), // Users might not create Surat Masuk
+            'create' => \App\Filament\App\Resources\AppSuratMasukResource\Pages\CreateAppSuratMasuk::route('/create'),
             'view' => \App\Filament\App\Resources\AppSuratMasukResource\Pages\ViewAppSuratMasuk::route('/{record}'),
         ];
     }

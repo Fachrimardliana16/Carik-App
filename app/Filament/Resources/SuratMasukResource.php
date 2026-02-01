@@ -138,7 +138,7 @@ class SuratMasukResource extends Resource
                     ->sortable()
                     ->weight(FontWeight::Bold),
                 Tables\Columns\TextColumn::make('klasifikasiArsip.kode')
-                    ->label('No. Reg')
+                    ->label('Kode Klasifikasi')
                     ->sortable()
                     ->searchable()
                     ->tooltip(fn ($record) => $record->klasifikasiArsip?->nama),

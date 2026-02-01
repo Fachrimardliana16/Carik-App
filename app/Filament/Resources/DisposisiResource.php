@@ -47,6 +47,7 @@ class DisposisiResource extends Resource
                             ->required()
                             ->searchable()
                             ->native(false)
+                            ->placeholder('Pilih surat yang akan didisposisikan')
                             ->columnSpanFull(),
                     ]),
 
@@ -68,7 +69,8 @@ class DisposisiResource extends Resource
                                     ->options(User::query()->pluck('name', 'id'))
                                     ->required()
                                     ->searchable()
-                                    ->native(false),
+                                    ->native(false)
+                                    ->placeholder('Pilih penerima disposisi'),
                             ]),
                         Forms\Components\RichEditor::make('instruksi')
                             ->label('Instruksi Disposisi')
@@ -128,6 +130,7 @@ class DisposisiResource extends Resource
                         Forms\Components\Textarea::make('catatan_penyelesaian')
                             ->label('Catatan Penyelesaian')
                             ->rows(4)
+                            ->placeholder('Tuliskan catatan atau hasil penyelesaian disposisi...')
                             ->columnSpanFull(),
                     ])
                     ->collapsible()
@@ -138,16 +141,19 @@ class DisposisiResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->with(['suratMasuk', 'dariUser', 'kepadaUser', 'creator']))
+            ->modifyQueryUsing(fn (Builder $query) => $query->with(['suratMasuk', 'suratKeluar', 'dariUser', 'kepadaUser', 'creator']))
             ->columns([
-                Tables\Columns\TextColumn::make('suratMasuk.nomor_surat')
+                Tables\Columns\TextColumn::make('nomor_surat')
                     ->label('No. Surat')
-                    ->searchable()
-                    ->sortable()
+                    ->getStateUsing(fn ($record) => $record->suratMasuk?->nomor_surat ?? $record->suratKeluar?->nomor_surat ?? '-')
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        return $query->whereHas('suratMasuk', fn ($q) => $q->where('nomor_surat', 'like', "%{$search}%"))
+                            ->orWhereHas('suratKeluar', fn ($q) => $q->where('nomor_surat', 'like', "%{$search}%"));
+                    })
                     ->weight(FontWeight::Bold),
-                Tables\Columns\TextColumn::make('suratMasuk.perihal')
+                Tables\Columns\TextColumn::make('perihal')
                     ->label('Perihal')
-                    ->searchable()
+                    ->getStateUsing(fn ($record) => $record->suratMasuk?->perihal ?? $record->suratKeluar?->perihal ?? '-')
                     ->limit(30)
                     ->wrap(),
                 Tables\Columns\TextColumn::make('dariUser.name')

@@ -25,12 +25,30 @@ class KlasifikasiArsipResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('kode')
-                    ->required(),
-                Forms\Components\TextInput::make('nama')
-                    ->required(),
-                Forms\Components\Textarea::make('keterangan')
-                    ->columnSpanFull(),
+                Forms\Components\Section::make()
+                    ->schema([
+                        Forms\Components\Select::make('parent_id')
+                            ->label('Induk Klasifikasi')
+                            ->relationship('parent', 'nama')
+                            ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->kode} - {$record->nama}")
+                            ->searchable()
+                            ->preload()
+                            ->nullable(),
+                        Forms\Components\TextInput::make('kode')
+                            ->label('Kode Klasifikasi')
+                            ->required()
+                            ->unique(ignoreRecord: true),
+                        Forms\Components\TextInput::make('nama')
+                            ->label('Nama Klasifikasi')
+                            ->required(),
+                        Forms\Components\TextInput::make('level')
+                            ->numeric()
+                            ->default(1)
+                            ->disabled()
+                            ->dehydrated(),
+                        Forms\Components\Textarea::make('keterangan')
+                            ->columnSpanFull(),
+                    ])->columns(2)
             ]);
     }
 
@@ -39,9 +57,29 @@ class KlasifikasiArsipResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('kode')
-                    ->searchable(),
+                    ->label('Kode')
+                    ->searchable()
+                    ->sortable()
+                    ->weight('bold'),
                 Tables\Columns\TextColumn::make('nama')
-                    ->searchable(),
+                    ->label('Nama Klasifikasi')
+                    ->searchable()
+                    ->sortable()
+                    ->wrap(),
+                Tables\Columns\TextColumn::make('parent.kode')
+                    ->label('Induk')
+                    ->searchable()
+                    ->sortable()
+                    ->placeholder('-'),
+                Tables\Columns\TextColumn::make('level')
+                    ->badge()
+                    ->color(fn (int $state): string => match ($state) {
+                        1 => 'primary',
+                        2 => 'success',
+                        3 => 'warning',
+                        default => 'gray',
+                    })
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

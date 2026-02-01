@@ -15,7 +15,7 @@ class DisposisiPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('view_any_app::disposisi');
+        return $user->can('view_any_disposisi');
     }
 
     /**
@@ -23,7 +23,7 @@ class DisposisiPolicy
      */
     public function view(User $user, Disposisi $disposisi): bool
     {
-        return $user->can('view_app::disposisi');
+        return $user->can('view_disposisi');
     }
 
     /**
@@ -31,7 +31,7 @@ class DisposisiPolicy
      */
     public function create(User $user): bool
     {
-        return $user->can('create_app::disposisi');
+        return $user->can('create_disposisi');
     }
 
     /**
@@ -39,7 +39,7 @@ class DisposisiPolicy
      */
     public function update(User $user, Disposisi $disposisi): bool
     {
-        return $user->can('update_app::disposisi');
+        return $user->can('update_disposisi');
     }
 
     /**
@@ -47,7 +47,7 @@ class DisposisiPolicy
      */
     public function delete(User $user, Disposisi $disposisi): bool
     {
-        return $user->can('delete_app::disposisi');
+        return $user->can('delete_disposisi');
     }
 
     /**
@@ -55,7 +55,7 @@ class DisposisiPolicy
      */
     public function deleteAny(User $user): bool
     {
-        return $user->can('delete_any_app::disposisi');
+        return $user->can('delete_any_disposisi');
     }
 
     /**
@@ -63,7 +63,7 @@ class DisposisiPolicy
      */
     public function forceDelete(User $user, Disposisi $disposisi): bool
     {
-        return $user->can('force_delete_app::disposisi');
+        return $user->can('force_delete_disposisi');
     }
 
     /**
@@ -71,7 +71,7 @@ class DisposisiPolicy
      */
     public function forceDeleteAny(User $user): bool
     {
-        return $user->can('force_delete_any_app::disposisi');
+        return $user->can('force_delete_any_disposisi');
     }
 
     /**
@@ -79,7 +79,7 @@ class DisposisiPolicy
      */
     public function restore(User $user, Disposisi $disposisi): bool
     {
-        return $user->can('restore_app::disposisi');
+        return $user->can('restore_disposisi');
     }
 
     /**
@@ -87,7 +87,7 @@ class DisposisiPolicy
      */
     public function restoreAny(User $user): bool
     {
-        return $user->can('restore_any_app::disposisi');
+        return $user->can('restore_any_disposisi');
     }
 
     /**
@@ -95,7 +95,7 @@ class DisposisiPolicy
      */
     public function replicate(User $user, Disposisi $disposisi): bool
     {
-        return $user->can('replicate_app::disposisi');
+        return $user->can('replicate_disposisi');
     }
 
     /**
@@ -103,6 +103,6 @@ class DisposisiPolicy
      */
     public function reorder(User $user): bool
     {
-        return $user->can('reorder_app::disposisi');
+        return $user->can('reorder_disposisi');
     }
 }

@@ -3,10 +3,10 @@
 namespace App\Policies;
 
 use App\Models\User;
-use App\Models\SuratMasuk;
+use App\Models\ManualBook;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-class SuratMasukPolicy
+class ManualBookPolicy
 {
     use HandlesAuthorization;
 
@@ -15,15 +15,15 @@ class SuratMasukPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('view_any_surat::masuk');
+        return $user->can('view_any_manual::book');
     }
 
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, SuratMasuk $suratMasuk): bool
+    public function view(User $user, ManualBook $manualBook): bool
     {
-        return $user->can('view_surat::masuk');
+        return $user->can('view_manual::book');
     }
 
     /**
@@ -31,23 +31,23 @@ class SuratMasukPolicy
      */
     public function create(User $user): bool
     {
-        return $user->can('create_surat::masuk');
+        return $user->can('create_manual::book');
     }
 
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, SuratMasuk $suratMasuk): bool
+    public function update(User $user, ManualBook $manualBook): bool
     {
-        return $user->can('update_surat::masuk');
+        return $user->can('update_manual::book');
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, SuratMasuk $suratMasuk): bool
+    public function delete(User $user, ManualBook $manualBook): bool
     {
-        return $user->can('delete_surat::masuk');
+        return $user->can('delete_manual::book');
     }
 
     /**
@@ -55,15 +55,15 @@ class SuratMasukPolicy
      */
     public function deleteAny(User $user): bool
     {
-        return $user->can('delete_any_surat::masuk');
+        return $user->can('delete_any_manual::book');
     }
 
     /**
      * Determine whether the user can permanently delete.
      */
-    public function forceDelete(User $user, SuratMasuk $suratMasuk): bool
+    public function forceDelete(User $user, ManualBook $manualBook): bool
     {
-        return $user->can('force_delete_surat::masuk');
+        return $user->can('force_delete_manual::book');
     }
 
     /**
@@ -71,15 +71,15 @@ class SuratMasukPolicy
      */
     public function forceDeleteAny(User $user): bool
     {
-        return $user->can('force_delete_any_surat::masuk');
+        return $user->can('force_delete_any_manual::book');
     }
 
     /**
      * Determine whether the user can restore.
      */
-    public function restore(User $user, SuratMasuk $suratMasuk): bool
+    public function restore(User $user, ManualBook $manualBook): bool
     {
-        return $user->can('restore_surat::masuk');
+        return $user->can('restore_manual::book');
     }
 
     /**
@@ -87,15 +87,15 @@ class SuratMasukPolicy
      */
     public function restoreAny(User $user): bool
     {
-        return $user->can('restore_any_surat::masuk');
+        return $user->can('restore_any_manual::book');
     }
 
     /**
      * Determine whether the user can replicate.
      */
-    public function replicate(User $user, SuratMasuk $suratMasuk): bool
+    public function replicate(User $user, ManualBook $manualBook): bool
     {
-        return $user->can('replicate_surat::masuk');
+        return $user->can('replicate_manual::book');
     }
 
     /**
@@ -103,6 +103,6 @@ class SuratMasukPolicy
      */
     public function reorder(User $user): bool
     {
-        return $user->can('reorder_surat::masuk');
+        return $user->can('reorder_manual::book');
     }
 }

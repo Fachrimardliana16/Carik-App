@@ -13,8 +13,10 @@ return new class extends Migration
     {
         Schema::create('klasifikasi_arsips', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('parent_id')->nullable()->constrained('klasifikasi_arsips')->onDelete('cascade');
             $table->string('kode')->unique();
             $table->string('nama');
+            $table->integer('level')->default(1);
             $table->text('keterangan')->nullable();
             $table->timestamps();
         });

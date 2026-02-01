@@ -15,7 +15,7 @@ class SplanerPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('view_any_app::splaner');
+        return $user->can('view_any_splaner');
     }
 
     /**
@@ -23,7 +23,7 @@ class SplanerPolicy
      */
     public function view(User $user, Splaner $splaner): bool
     {
-        return $user->can('view_app::splaner');
+        return $user->can('view_splaner');
     }
 
     /**
@@ -31,7 +31,7 @@ class SplanerPolicy
      */
     public function create(User $user): bool
     {
-        return $user->can('create_app::splaner');
+        return $user->can('create_splaner');
     }
 
     /**
@@ -39,7 +39,7 @@ class SplanerPolicy
      */
     public function update(User $user, Splaner $splaner): bool
     {
-        return $user->can('update_app::splaner');
+        return $user->can('update_splaner');
     }
 
     /**
@@ -47,7 +47,7 @@ class SplanerPolicy
      */
     public function delete(User $user, Splaner $splaner): bool
     {
-        return $user->can('delete_app::splaner');
+        return $user->can('delete_splaner');
     }
 
     /**
@@ -55,7 +55,7 @@ class SplanerPolicy
      */
     public function deleteAny(User $user): bool
     {
-        return $user->can('delete_any_app::splaner');
+        return $user->can('delete_any_splaner');
     }
 
     /**
@@ -63,7 +63,7 @@ class SplanerPolicy
      */
     public function forceDelete(User $user, Splaner $splaner): bool
     {
-        return $user->can('force_delete_app::splaner');
+        return $user->can('force_delete_splaner');
     }
 
     /**
@@ -71,7 +71,7 @@ class SplanerPolicy
      */
     public function forceDeleteAny(User $user): bool
     {
-        return $user->can('force_delete_any_app::splaner');
+        return $user->can('force_delete_any_splaner');
     }
 
     /**
@@ -79,7 +79,7 @@ class SplanerPolicy
      */
     public function restore(User $user, Splaner $splaner): bool
     {
-        return $user->can('restore_app::splaner');
+        return $user->can('restore_splaner');
     }
 
     /**
@@ -87,7 +87,7 @@ class SplanerPolicy
      */
     public function restoreAny(User $user): bool
     {
-        return $user->can('restore_any_app::splaner');
+        return $user->can('restore_any_splaner');
     }
 
     /**
@@ -95,7 +95,7 @@ class SplanerPolicy
      */
     public function replicate(User $user, Splaner $splaner): bool
     {
-        return $user->can('replicate_app::splaner');
+        return $user->can('replicate_splaner');
     }
 
     /**
@@ -103,6 +103,6 @@ class SplanerPolicy
      */
     public function reorder(User $user): bool
     {
-        return $user->can('reorder_app::splaner');
+        return $user->can('reorder_splaner');
     }
 }

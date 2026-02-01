@@ -16,6 +16,8 @@ class SuratKeluar extends Model
         'nomor_surat',
         'tanggal_surat',
         'tujuan',
+        'is_internal',
+        'tujuan_user_id',
         'perihal',
         'sifat',
         'status',
@@ -67,5 +69,15 @@ class SuratKeluar extends Model
     public function splaners()
     {
         return $this->hasMany(Splaner::class);
+    }
+
+    public function tujuanUser()
+    {
+        return $this->belongsTo(User::class, 'tujuan_user_id');
+    }
+
+    public function disposisis()
+    {
+        return $this->hasMany(Disposisi::class);
     }
 }

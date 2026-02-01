@@ -14,6 +14,7 @@ class Disposisi extends Model
 
     protected $fillable = [
         'surat_masuk_id',
+        'surat_keluar_id',
         'dari_user_id',
         'kepada_user_id',
         'instruksi',
@@ -53,5 +54,10 @@ class Disposisi extends Model
     public function kepadaUser()
     {
         return $this->belongsTo(User::class, 'kepada_user_id');
+    }
+
+    public function suratKeluar()
+    {
+        return $this->belongsTo(SuratKeluar::class);
     }
 }

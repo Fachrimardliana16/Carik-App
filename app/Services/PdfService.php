@@ -15,20 +15,24 @@ class PdfService
      */
     public static function printSuratKeluar(SuratKeluar $surat)
     {
-        $pdf = Pdf::loadView('pdf.surat-keluar', [
-            'surat' => $surat,
-            'company' => [
-                'name' => SettingsService::getCompanyName(),
-                'address' => SettingsService::get('company_address'),
-                'phone' => SettingsService::get('company_phone'),
-                'email' => SettingsService::get('company_email'),
-                'logo' => self::getLogoBase64(),
-            ],
-        ]);
+        try {
+            $pdf = Pdf::loadView('pdf.surat-keluar', [
+                'surat' => $surat,
+                'company' => [
+                    'name' => SettingsService::getCompanyName(),
+                    'address' => SettingsService::get('company_address'),
+                    'phone' => SettingsService::get('company_phone'),
+                    'email' => SettingsService::get('company_email'),
+                    'logo' => self::getLogoBase64(),
+                ],
+            ]);
 
-        $pdf->setPaper('a4', 'portrait');
+            $pdf->setPaper('a4', 'portrait');
 
-        return $pdf->stream('Surat-Keluar-' . $surat->nomor_surat . '.pdf');
+            return $pdf->stream('Surat-Keluar-' . $surat->nomor_surat . '.pdf');
+        } catch (\Exception $e) {
+            dd($e->getMessage(), $e->getTraceAsString());
+        }
     }
 
     /**

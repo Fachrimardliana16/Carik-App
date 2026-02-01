@@ -42,6 +42,7 @@ class SplanerResource extends Resource
                                     ->label('Judul Kegiatan')
                                     ->required()
                                     ->maxLength(255)
+                                    ->placeholder('Contoh: Rapat Koordinasi Dinas')
                                     ->columnSpanFull(),
                                 Forms\Components\DateTimePicker::make('start_time')
                                     ->label('Waktu Mulai')
@@ -53,7 +54,8 @@ class SplanerResource extends Resource
                                     ->native(false),
                                 Forms\Components\TextInput::make('location')
                                     ->label('Lokasi')
-                                    ->maxLength(255),
+                                    ->maxLength(255)
+                                    ->placeholder('Contoh: Ruang Rapat Utama / Via Zoom'),
                                 Forms\Components\Select::make('status')
                                     ->options([
                                         'Dijadwalkan' => 'Dijadwalkan',

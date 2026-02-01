@@ -77,6 +77,9 @@ class SplanerCalendarWidget extends FullCalendarWidget
 
     public function onEventClick(array $info): void
     {
-        $this->mountAction('view', ['record' => $info['id']]);
+        $record = Splaner::find($info['id']);
+        if ($record) {
+            $this->mountAction('view', ['record' => $record]);
+        }
     }
 }

@@ -15,7 +15,7 @@ class ArsipDigitalPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('view_any_app::arsip::digital');
+        return $user->can('view_any_arsip::digital');
     }
 
     /**
@@ -23,7 +23,7 @@ class ArsipDigitalPolicy
      */
     public function view(User $user, ArsipDigital $arsipDigital): bool
     {
-        return $user->can('view_app::arsip::digital');
+        return $user->can('view_arsip::digital');
     }
 
     /**
@@ -31,7 +31,7 @@ class ArsipDigitalPolicy
      */
     public function create(User $user): bool
     {
-        return $user->can('create_app::arsip::digital');
+        return $user->can('create_arsip::digital');
     }
 
     /**
@@ -39,7 +39,7 @@ class ArsipDigitalPolicy
      */
     public function update(User $user, ArsipDigital $arsipDigital): bool
     {
-        return $user->can('update_app::arsip::digital');
+        return $user->can('update_arsip::digital');
     }
 
     /**
@@ -47,7 +47,7 @@ class ArsipDigitalPolicy
      */
     public function delete(User $user, ArsipDigital $arsipDigital): bool
     {
-        return $user->can('delete_app::arsip::digital');
+        return $user->can('delete_arsip::digital');
     }
 
     /**
@@ -55,7 +55,7 @@ class ArsipDigitalPolicy
      */
     public function deleteAny(User $user): bool
     {
-        return $user->can('delete_any_app::arsip::digital');
+        return $user->can('delete_any_arsip::digital');
     }
 
     /**
@@ -63,7 +63,7 @@ class ArsipDigitalPolicy
      */
     public function forceDelete(User $user, ArsipDigital $arsipDigital): bool
     {
-        return $user->can('force_delete_app::arsip::digital');
+        return $user->can('force_delete_arsip::digital');
     }
 
     /**
@@ -71,7 +71,7 @@ class ArsipDigitalPolicy
      */
     public function forceDeleteAny(User $user): bool
     {
-        return $user->can('force_delete_any_app::arsip::digital');
+        return $user->can('force_delete_any_arsip::digital');
     }
 
     /**
@@ -79,7 +79,7 @@ class ArsipDigitalPolicy
      */
     public function restore(User $user, ArsipDigital $arsipDigital): bool
     {
-        return $user->can('restore_app::arsip::digital');
+        return $user->can('restore_arsip::digital');
     }
 
     /**
@@ -87,7 +87,7 @@ class ArsipDigitalPolicy
      */
     public function restoreAny(User $user): bool
     {
-        return $user->can('restore_any_app::arsip::digital');
+        return $user->can('restore_any_arsip::digital');
     }
 
     /**
@@ -95,7 +95,7 @@ class ArsipDigitalPolicy
      */
     public function replicate(User $user, ArsipDigital $arsipDigital): bool
     {
-        return $user->can('replicate_app::arsip::digital');
+        return $user->can('replicate_arsip::digital');
     }
 
     /**
@@ -103,6 +103,6 @@ class ArsipDigitalPolicy
      */
     public function reorder(User $user): bool
     {
-        return $user->can('reorder_app::arsip::digital');
+        return $user->can('reorder_arsip::digital');
     }
 }

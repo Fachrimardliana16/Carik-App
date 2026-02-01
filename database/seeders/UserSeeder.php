@@ -4,9 +4,11 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\User;
-use Spatie\Permission\Models\Role;
+use App\Models\Role;
 use Spatie\Permission\Models\Permission;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use App\Services\DigitalSignatureService;
 
 class UserSeeder extends Seeder
@@ -16,69 +18,81 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
+        // 0. Cleanup existing data (Optional but follows "hapus semua")
+        // Note: Be careful with foreign keys
+        Schema::disableForeignKeyConstraints();
+        DB::table('model_has_roles')->delete();
+        DB::table('model_has_permissions')->delete();
+        DB::table('role_has_permissions')->delete();
+        DB::table('users')->delete();
+        DB::table('roles')->delete();
+        Schema::enableForeignKeyConstraints();
+
         // 1. Setup Roles
-        $roleSuperAdmin = Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']);
-        $roleAdmin = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
-        $roleUser = Role::firstOrCreate(['name' => 'user', 'guard_name' => 'web']);
+        $roleSuperAdmin = Role::create(['name' => 'super_admin', 'guard_name' => 'web', 'panel_access' => ['admin', 'app']]);
+        $roleAdmin = Role::create(['name' => 'admin', 'guard_name' => 'web', 'panel_access' => ['admin', 'app']]);
+        $roleKabag = Role::create(['name' => 'kepala_bagian', 'guard_name' => 'web', 'panel_access' => ['app']]);
+        $roleKasubbag = Role::create(['name' => 'kepala_sub_bagian', 'guard_name' => 'web', 'panel_access' => ['app']]);
+        $roleStaff = Role::create(['name' => 'staff', 'guard_name' => 'web', 'panel_access' => ['app']]);
 
         $password = Hash::make('password');
 
         // 2. Seed Super Admin
-        $superAdmin = $this->createUser('Super Admin', 'superadmin', 'superadmin@mail.com', $roleSuperAdmin, $password);
+        $this->createUser('Super Admin', 'superadmin', 'superadmin@mail.com', 'super_admin', $password);
         
-        // Super Admin gets all permissions
-        $superAdmin->syncPermissions(Permission::all());
+        // 3. Seed Admin Role Users
+        $this->createUser('Admin', 'admin', 'admin@mail.com', 'admin', $password);
+        $this->createUser('Sekretaris', 'sekretaris', 'sekretaris@mail.com', 'admin', $password);
 
-        // 3. Seed Admins (admin & sekretaris)
-        // Permissions for Admin: All except User, ActivityLog, Role, and CompanySettings
-        $adminPermissions = Permission::where('name', 'not like', '%user%')
-            ->where('name', 'not like', '%activity%')
-            ->where('name', 'not like', '%role%')
-            ->where('name', 'not like', '%shield%') // Shield roles
-            ->where('name', 'not like', '%setting%') // Company settings
-            ->get();
-        $roleAdmin->syncPermissions($adminPermissions);
-
-        // admin@mail.com
-        $this->createUser('Administrator', 'admin', 'admin@mail.com', $roleAdmin, $password);
-        // sekretaris@mail.com
-        $this->createUser('Sekretaris', 'sekretaris', 'sekretaris@mail.com', $roleAdmin, $password);
-
-        // 4. Seed Users
-        // Users can access all resources but they are scoped by Panel App logic in User.php
-        // However, we can also limit their permissions if needed. 
-        // For now, let's give them permissions for common resources.
-        $userExcluded = ['user', 'activity', 'role', 'shield', 'setting', 'audit'];
-        $userPermissions = Permission::query();
-        foreach ($userExcluded as $ex) {
-            $userPermissions->where('name', 'not like', "%{$ex}%");
+        // 4. Seed Kepala Bagian (4 users)
+        for ($i = 1; $i <= 4; $i++) {
+            $this->createUser("Kepala Bagian $i", "kabag$i", "kabag$i@mail.com", 'kepala_bagian', $password);
         }
-        $roleUser->syncPermissions($userPermissions->get());
 
-        $this->createUser('User Satu', 'user1', 'user1@mail.com', $roleUser, $password);
-        $this->createUser('User Dua', 'user2', 'user2@mail.com', $roleUser, $password);
+        // 5. Seed Kepala Sub Bagian (4 users)
+        for ($i = 1; $i <= 4; $i++) {
+            $this->createUser("Kepala Sub Bagian $i", "kasubbag$i", "kasubbag$i@mail.com", 'kepala_sub_bagian', $password);
+        }
 
-        // 5. Scenario Specific Users
-        $this->createUser('Direktur Utama', 'direktur', 'direktur@mail.com', $roleUser, $password);
-        $this->createUser('Karyawan', 'karyawan', 'karyawan@mail.com', $roleUser, $password);
+        // 6. Assign Permissions to Roles
+        // Ensure permissions exist in case shield hasn't run yet (but it should)
+        $permissions = Permission::all();
+        
+        if ($permissions->count() > 0) {
+            $roleSuperAdmin->syncPermissions($permissions);
+            $roleAdmin->syncPermissions($permissions);
+            $roleKabag->syncPermissions($permissions);
+            $roleKasubbag->syncPermissions($permissions);
+            $roleStaff->syncPermissions($permissions);
+        }
+
+        // 7. Seed Staff (4 users)
+        $staffData = [
+            ['name' => 'Staf 1', 'username' => 'staf1', 'email' => 'staff1@mail.com'],
+            ['name' => 'Staf 2', 'username' => 'staf2', 'email' => 'staff2@mail.com'],
+            ['name' => 'Staff 3', 'username' => 'staf3', 'email' => 'staff3@mail.com'],
+            ['name' => 'Staff 4', 'username' => 'staf4', 'email' => 'staff4@mail.com'],
+        ];
+
+        foreach ($staffData as $s) {
+            $this->createUser($s['name'], $s['username'], $s['email'], 'staff', $password);
+        }
     }
 
-    private function createUser($name, $username, $email, $role, $password)
+    private function createUser($name, $username, $email, $roleName, $password)
     {
-        $user = User::updateOrCreate(
-            ['username' => $username],
-            [
-                'name' => $name,
-                'email' => $email,
-                'password' => $password,
-                'email_verified_at' => now(),
-            ]
-        );
+        $user = User::create([
+            'name' => $name,
+            'username' => $username,
+            'email' => $email,
+            'password' => $password,
+            'email_verified_at' => now(),
+        ]);
         
-        $user->assignRole($role);
+        $user->assignRole($roleName);
         
-        // Generate Keys specifically for Directors/Chiefs for convenience
-        if (str_contains(strtolower($name), 'direktur') || str_contains(strtolower($name), 'kepala')) {
+        // Generate Keys specifically for Leaders for Digital Signature
+        if (str_contains(strtolower($roleName), 'admin') || str_contains(strtolower($roleName), 'kepala')) {
             DigitalSignatureService::generateKeyPair($user);
         }
 

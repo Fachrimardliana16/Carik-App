@@ -16,9 +16,14 @@ class DisposisiObserver
         $recipient = $disposisi->kepadaUser;
         $sender = $disposisi->dariUser;
 
+        // Determine the surat (could be SuratMasuk or SuratKeluar)
+        $surat = $disposisi->suratMasuk ?? $disposisi->suratKeluar;
+        $nomorSurat = $surat?->nomor_surat ?? 'N/A';
+        $suratType = $disposisi->surat_masuk_id ? 'Surat Masuk' : 'Surat Keluar';
+
         Notification::make()
             ->title('Disposisi Baru')
-            ->body("**{$sender->name}** mengirim disposisi untuk surat: **{$disposisi->suratMasuk->nomor_surat}**")
+            ->body("**{$sender->name}** mengirim disposisi untuk {$suratType}: **{$nomorSurat}**")
             ->icon('heroicon-o-inbox-arrow-down')
             ->actions([
                 Action::make('view')

@@ -45,14 +45,17 @@ class NotulensiResource extends Resource
                                     ->native(false),
                                 Forms\Components\TextInput::make('tempat')
                                     ->required()
-                                    ->maxLength(255),
+                                    ->maxLength(255)
+                                    ->placeholder('Contoh: Ruang Rapat Lt. 2'),
                                 Forms\Components\TextInput::make('agenda')
                                     ->required()
                                     ->maxLength(255)
+                                    ->placeholder('Contoh: Rapat Koordinasi Bulanan')
                                     ->columnSpanFull(),
                                 Forms\Components\TextInput::make('pimpinan_rapat')
                                     ->required()
-                                    ->maxLength(255),
+                                    ->maxLength(255)
+                                    ->placeholder('Nama pimpinan rapat'),
                                 Forms\Components\Select::make('notulis_id')
                                     ->relationship('notulis', 'name')
                                     ->default(auth()->id())

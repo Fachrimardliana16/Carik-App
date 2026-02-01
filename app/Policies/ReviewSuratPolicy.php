@@ -15,7 +15,7 @@ class ReviewSuratPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('view_any_app::review::surat');
+        return $user->can('view_any_review::surat');
     }
 
     /**
@@ -23,7 +23,7 @@ class ReviewSuratPolicy
      */
     public function view(User $user, ReviewSurat $reviewSurat): bool
     {
-        return $user->can('view_app::review::surat');
+        return $user->can('view_review::surat');
     }
 
     /**
@@ -31,7 +31,7 @@ class ReviewSuratPolicy
      */
     public function create(User $user): bool
     {
-        return $user->can('create_app::review::surat');
+        return $user->can('create_review::surat');
     }
 
     /**
@@ -39,7 +39,7 @@ class ReviewSuratPolicy
      */
     public function update(User $user, ReviewSurat $reviewSurat): bool
     {
-        return $user->can('update_app::review::surat');
+        return $user->can('update_review::surat');
     }
 
     /**
@@ -47,7 +47,7 @@ class ReviewSuratPolicy
      */
     public function delete(User $user, ReviewSurat $reviewSurat): bool
     {
-        return $user->can('delete_app::review::surat');
+        return $user->can('delete_review::surat');
     }
 
     /**
@@ -55,7 +55,7 @@ class ReviewSuratPolicy
      */
     public function deleteAny(User $user): bool
     {
-        return $user->can('delete_any_app::review::surat');
+        return $user->can('delete_any_review::surat');
     }
 
     /**
@@ -63,7 +63,7 @@ class ReviewSuratPolicy
      */
     public function forceDelete(User $user, ReviewSurat $reviewSurat): bool
     {
-        return $user->can('force_delete_app::review::surat');
+        return $user->can('force_delete_review::surat');
     }
 
     /**
@@ -71,7 +71,7 @@ class ReviewSuratPolicy
      */
     public function forceDeleteAny(User $user): bool
     {
-        return $user->can('force_delete_any_app::review::surat');
+        return $user->can('force_delete_any_review::surat');
     }
 
     /**
@@ -79,7 +79,7 @@ class ReviewSuratPolicy
      */
     public function restore(User $user, ReviewSurat $reviewSurat): bool
     {
-        return $user->can('restore_app::review::surat');
+        return $user->can('restore_review::surat');
     }
 
     /**
@@ -87,7 +87,7 @@ class ReviewSuratPolicy
      */
     public function restoreAny(User $user): bool
     {
-        return $user->can('restore_any_app::review::surat');
+        return $user->can('restore_any_review::surat');
     }
 
     /**
@@ -95,7 +95,7 @@ class ReviewSuratPolicy
      */
     public function replicate(User $user, ReviewSurat $reviewSurat): bool
     {
-        return $user->can('replicate_app::review::surat');
+        return $user->can('replicate_review::surat');
     }
 
     /**
@@ -103,6 +103,6 @@ class ReviewSuratPolicy
      */
     public function reorder(User $user): bool
     {
-        return $user->can('reorder_app::review::surat');
+        return $user->can('reorder_review::surat');
     }
 }
