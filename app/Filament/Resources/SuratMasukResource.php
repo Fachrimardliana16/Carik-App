@@ -26,6 +26,16 @@ class SuratMasukResource extends Resource
     protected static ?string $navigationGroup = 'Persuratan';
     protected static ?int $navigationSort = 2;
 
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::whereHas('statusSurat', fn ($q) => $q->where('nama', 'Sent'))->count() ?: null;
+    }
+
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return 'danger';
+    }
+
     public static function form(Form $form): Form
     {
         return $form
@@ -36,13 +46,11 @@ class SuratMasukResource extends Resource
                         Forms\Components\Grid::make(2)
                             ->schema([
                                 Forms\Components\TextInput::make('nomor_agenda')
-                                    ->label('Nomor Agenda')
+                                    ->label('Nomor Registrasi')
                                     ->required()
                                     ->unique(ignoreRecord: true)
                                     ->maxLength(255)
-                                    ->placeholder('AGD-YYYYMMDD...')
-                                    ->default(fn () => 'AGD-' . date('YmdHis'))
-                                    ->helperText('Nomor pencatatan sistem.'),
+                                    ->placeholder('Contoh: REG-2024-001'),
                                 Forms\Components\TextInput::make('nomor_surat')
                                     ->label('Nomor Surat')
                                     ->required()
@@ -55,7 +63,6 @@ class SuratMasukResource extends Resource
                                     ->relationship('klasifikasiArsip', 'nama')
                                     ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->kode} - {$record->nama}")
                                     ->searchable()
-                                    ->preload()
                                     ->required()
                                     ->native(false)
                                     ->columnSpanFull(),
@@ -66,43 +73,52 @@ class SuratMasukResource extends Resource
                                 Forms\Components\DatePicker::make('tanggal_surat')
                                     ->label('Tanggal Surat')
                                     ->required()
+                                     ->default(now())
                                     ->maxDate(now())
-                                    ->native(false),
+                                    ->native(false)
+                                    ->suffixIcon('heroicon-m-calendar'),
                                 Forms\Components\DatePicker::make('tanggal_diterima')
                                     ->label('Tanggal Diterima')
                                     ->required()
                                     ->default(now())
-                                    ->native(false),
+                                    ->native(false)
+                                    ->suffixIcon('heroicon-m-calendar'),
                             ]),
                     ]),
 
                 Forms\Components\Section::make('Detail Surat')
                     ->schema([
-                        Forms\Components\TextInput::make('pengirim')
-                            ->label('Pengirim')
-                            ->required()
-                            ->maxLength(255)
-                            ->placeholder('Nama Instansi / Pengirim'),
-                        Forms\Components\TextInput::make('perihal')
-                            ->label('Perihal')
-                            ->required()
-                            ->maxLength(255)
-                            ->placeholder('Pokok isi surat'),
-                        Forms\Components\Grid::make(2)
+                        Forms\Components\Grid::make(3)
                             ->schema([
-                                Forms\Components\Select::make('sifat')
-                                    ->label('Sifat Surat')
-                                    ->options([
-                                        'Biasa' => 'Biasa',
-                                        'Segera' => 'Segera',
-                                        'Sangat Segera' => 'Sangat Segera',
-                                        'Rahasia' => 'Rahasia',
-                                    ])
+                                Forms\Components\TextInput::make('pengirim')
+                                    ->label('Pengirim')
                                     ->required()
-                                    ->native(false),
-                                Forms\Components\Hidden::make('status_surat_id')
-                                    ->default(fn () => \App\Models\StatusSurat::where('nama', 'Sent')->first()?->id ?? \App\Models\StatusSurat::where('is_default', true)->first()?->id),
+                                    ->maxLength(255)
+                                    ->placeholder('Nama Instansi / Pengirim'),
+                                Forms\Components\Select::make('tujuan_user_id')
+                                    ->label('Tujuan')
+                                    ->relationship('tujuanUser', 'name')
+                                    ->searchable()
+                                    ->placeholder('Pilih penerima surat'),
+                                Forms\Components\TextInput::make('perihal')
+                                    ->label('Perihal')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->placeholder('Pokok isi surat'),
                             ]),
+                        Forms\Components\Select::make('sifat')
+                            ->label('Sifat Surat')
+                            ->options([
+                                'Biasa' => 'Biasa',
+                                'Segera' => 'Segera',
+                                'Sangat Segera' => 'Sangat Segera',
+                                'Rahasia' => 'Rahasia',
+                            ])
+                            ->required()
+                            ->native(false)
+                            ->columnSpanFull(),
+                        Forms\Components\Hidden::make('status_surat_id')
+                            ->default(fn () => \App\Models\StatusSurat::where('nama', 'Sent')->first()?->id ?? \App\Models\StatusSurat::where('is_default', true)->first()?->id),
                         Forms\Components\Textarea::make('isi_ringkas')
                             ->label('Isi Ringkas')
                             ->rows(4)
@@ -115,8 +131,8 @@ class SuratMasukResource extends Resource
                         Forms\Components\FileUpload::make('file_path')
                             ->label('File Surat')
                             ->directory('surat-masuk')
-                            ->acceptedFileTypes(['application/pdf', 'image/*'])
-                            ->maxSize(10240)
+                            ->acceptedFileTypes(['application/pdf', 'image/jpeg', 'image/png'])
+                            ->maxSize(102400) // 100MB
                             ->saveUploadedFileUsing(function (UploadedFile $file) {
                                 return \App\Services\FileEncryptionService::encryptAndStore($file, 'surat-masuk');
                             })
@@ -130,7 +146,7 @@ class SuratMasukResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->with(['creator', 'updater', 'klasifikasiArsip', 'statusSurat']))
+            ->modifyQueryUsing(fn (Builder $query) => $query->with(['creator', 'updater', 'klasifikasiArsip', 'statusSurat', 'tujuanUser']))
             ->columns([
                 Tables\Columns\TextColumn::make('nomor_surat')
                     ->label('No. Surat')
@@ -143,7 +159,7 @@ class SuratMasukResource extends Resource
                     ->searchable()
                     ->tooltip(fn ($record) => $record->klasifikasiArsip?->nama),
                 Tables\Columns\TextColumn::make('nomor_agenda')
-                    ->label('No. Agenda')
+                    ->label('No. Registrasi')
                     ->searchable()
                     ->sortable()
                     ->toggleable(),
@@ -160,6 +176,11 @@ class SuratMasukResource extends Resource
                     ->label('Pengirim')
                     ->searchable()
                     ->limit(30),
+                Tables\Columns\TextColumn::make('tujuanUser.name')
+                    ->label('Tujuan')
+                    ->searchable()
+                    ->limit(30)
+                    ->toggleable(),
                 Tables\Columns\TextColumn::make('perihal')
                     ->label('Perihal')
                     ->searchable()
@@ -173,10 +194,37 @@ class SuratMasukResource extends Resource
                         'danger' => 'Sangat Segera',
                         'gray' => 'Rahasia',
                     ]),
-                Tables\Columns\TextColumn::make('statusSurat.nama')
+                Tables\Columns\TextColumn::make('status_context')
                     ->label('Status')
                     ->badge()
-                    ->color(fn ($record) => $record->statusSurat?->warna ?? 'gray'),
+                    ->getStateUsing(function ($record) {
+                        $user = auth()->user();
+                        // Admin/Super Admin sees the actual document status
+                        if ($user->hasAnyRole(['super_admin', 'admin'])) {
+                            return $record->statusSurat?->nama;
+                        }
+
+                        // Check if user is a disposition recipient
+                        $disposisi = $record->disposisis()->where('kepada_user_id', $user->id)->latest()->first();
+                        if ($disposisi) {
+                            return $disposisi->status; // Pending, Diterima, Selesai
+                        }
+
+                        // Check if user is the main recipient
+                        if ($record->tujuan_user_id === $user->id) {
+                            return $record->status; // PENDING (default now), Diterima, Selesai
+                        }
+
+                        // Fallback to document status (e.g., creator or observer)
+                        return $record->statusSurat?->nama;
+                    })
+                    ->colors([
+                        'gray' => ['Draft', 'Pending'],
+                        'warning' => ['Review', 'Didisposisi', 'Diproses'],
+                        'success' => ['Signed', 'Diterima', 'Selesai'],
+                        'danger' => ['Sent', 'Archived'],
+                        'primary' => 'Biasa',
+                    ]),
                 Tables\Columns\TextColumn::make('creator.name')
                     ->label('Dibuat Oleh')
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -191,6 +239,7 @@ class SuratMasukResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->defaultSort('created_at', 'desc')
             ->filters([
                 Tables\Filters\SelectFilter::make('status_surat_id')
                     ->label('Status')
@@ -228,42 +277,49 @@ class SuratMasukResource extends Resource
             ])
             ->actions([
                 Tables\Actions\ActionGroup::make([
-                    Tables\Actions\ViewAction::make(),
+                    Tables\Actions\ViewAction::make()
+                        ->modalWidth(\Filament\Support\Enums\MaxWidth::FiveExtraLarge),
                     Tables\Actions\EditAction::make(),
                     Tables\Actions\Action::make('terima')
                         ->label('Terima')
                         ->icon('heroicon-o-check-circle')
                         ->color('success')
-                        ->visible(fn ($record) => $record->statusSurat?->nama === 'Draft')
-                        ->form([
-                            Forms\Components\Select::make('klasifikasi_arsip_id')
-                                ->label('Klasifikasi Arsip')
-                                ->relationship('klasifikasiArsip', 'nama')
-                                ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->kode} - {$record->nama}")
-                                ->searchable()
-                                ->preload()
-                                ->required(),
-                            Forms\Components\Select::make('sifat')
-                                ->label('Sifat Surat')
-                                ->options([
-                                    'Biasa' => 'Biasa',
-                                    'Segera' => 'Segera',
-                                    'Sangat Segera' => 'Sangat Segera',
-                                    'Rahasia' => 'Rahasia',
-                                ])
-                                ->required(),
-                            Forms\Components\Select::make('status_surat_id')
-                                ->label('Status Baru')
-                                ->relationship('statusSurat', 'nama')
-                                ->default(fn () => \App\Models\StatusSurat::where('nama', '!=', 'Draft')->where('is_default', true)->first()?->id)
-                                ->required(),
-                        ])
-                        ->action(function (SuratMasuk $record, array $data) {
-                            $record->update($data);
-                            \Filament\Notifications\Notification::make()
-                                ->title('Surat Berhasil Diterima')
-                                ->success()
-                                ->send();
+                        ->visible(fn ($record) => 
+                            // Admin/Super Admin can accept Draft
+                            ($record->statusSurat?->nama === 'Draft' && auth()->user()->hasAnyRole(['admin', 'super_admin'])) ||
+                            // Recipient (Tujuan) can accept if Pending - Including Direktur, Kabag, Kasubag, Staff
+                            ($record->tujuan_user_id === auth()->id() && $record->status === 'Pending' && auth()->user()->hasAnyRole(['direktur', 'kepala_bagian', 'kepala_sub_bagian', 'staff'])) ||
+                            // Disposition recipient can accept - Including various roles
+                            ($record->disposisis()->where('kepada_user_id', auth()->id())->where('status', 'Pending')->exists() && auth()->user()->hasAnyRole(['direktur', 'kepala_bagian', 'kepala_sub_bagian', 'staff']))
+                        )
+                        ->action(function (SuratMasuk $record) {
+                            $user = auth()->user();
+                            $isStaff = $user->hasRole('staff');
+                            $statusToSet = $isStaff ? 'Selesai' : 'Diterima';
+
+                            // Update surat status if it was draft
+                            if ($record->statusSurat?->nama === 'Draft') {
+                                $statusDefault = \App\Models\StatusSurat::where('nama', '!=', 'Draft')->where('is_default', true)->first();
+                                if ($statusDefault) {
+                                    $record->update(['status_surat_id' => $statusDefault->id]);
+                                }
+                            }
+                            
+                            // Update Disposisi
+                            $disposisiRef = $record->disposisis()->where('kepada_user_id', $user->id)->where('status', 'Pending');
+                            $updateData = ['status' => $statusToSet, 'dibaca_pada' => now()];
+                            if ($isStaff) {
+                                $updateData['selesai_pada'] = now();
+                            }
+                            $disposisiRef->update($updateData);
+
+                            // Update Main Record if Recipient
+                            if ($record->tujuan_user_id === $user->id) {
+                                $record->update(['status' => $statusToSet]);
+                            }
+                            
+                            $msg = $isStaff ? 'Surat Berhasil Diterima dan Diselesaikan' : 'Surat Berhasil Diterima';
+                            \Filament\Notifications\Notification::make()->title($msg)->success()->send();
                         }),
                     Tables\Actions\Action::make('tolak')
                         ->label('Tolak')
@@ -286,10 +342,37 @@ class SuratMasukResource extends Resource
                         ->label('Buat Disposisi')
                         ->icon('heroicon-o-paper-airplane')
                         ->color('primary')
+                        ->color('primary')
+                        ->visible(function ($record) {
+                             $user = auth()->user();
+                             if (!$user->hasAnyRole(['super_admin', 'admin', 'sekretaris', 'direktur', 'kepala_bagian', 'kepala_sub_bagian'])) return false;
+                             
+                             // Admin/Sekretaris can always dispose (unless restricted, but usually they distribute)
+                             if ($user->hasAnyRole(['super_admin', 'admin', 'sekretaris']) && $record->disposisis()->count() == 0) return true;
+
+                             // If acts as Main Recipient
+                             if ($record->tujuan_user_id === $user->id) {
+                                 return $record->status === 'Diterima';
+                             }
+                             
+                             // If acts as Disposition Recipient
+                             $usersDisposition = $record->disposisis()->where('kepada_user_id', $user->id)->latest()->first();
+                             if ($usersDisposition) {
+                                 // Only visible if status is Diterima
+                                 return $usersDisposition->status === 'Diterima';
+                             }
+
+                             // Admins can override/dispose anytime? Let's restrict to keep flow clean, or allow if necessary.
+                             // For now, return false for anyone else who doesn't 'hold' the letter.
+                             if ($user->hasAnyRole(['super_admin', 'admin'])) return true;
+
+                             return false;
+                        })
                         ->form([
-                            Forms\Components\Select::make('kepada_user_id')
+                            Forms\Components\Select::make('kepada_user_ids')
                                 ->label('Tujuan Disposisi')
-                                ->relationship('disposisis.kepadaUser', 'name')
+                                ->options(fn () => \App\Models\User::pluck('name', 'id'))
+                                ->multiple()
                                 ->searchable()
                                 ->preload()
                                 ->required(),
@@ -310,18 +393,91 @@ class SuratMasukResource extends Resource
                                 ->label('Batas Waktu'),
                         ])
                         ->action(function (SuratMasuk $record, array $data) {
-                            $record->disposisis()->create([
-                                'dari_user_id' => auth()->id(),
-                                'kepada_user_id' => $data['kepada_user_id'],
-                                'instruksi' => $data['instruksi'],
-                                'prioritas' => $data['prioritas'],
-                                'batas_waktu' => $data['batas_waktu'],
-                                'status' => 'Pending',
-                            ]);
+                            // Create multiple dispositions for each recipient
+                            foreach ($data['kepada_user_ids'] as $kepadaUserId) {
+                                $record->disposisis()->create([
+                                    'dari_user_id' => auth()->id(),
+                                    'kepada_user_id' => $kepadaUserId,
+                                    'instruksi' => $data['instruksi'],
+                                    'prioritas' => $data['prioritas'],
+                                    'batas_waktu' => $data['batas_waktu'],
+                                    'status' => 'Pending',
+                                ]);
+                            }
+                            
+                            // Mark current user's disposition as Selesai
+                            $record->disposisis()->where('kepada_user_id', auth()->id())->where('status', 'Diterima')
+                                ->update(['status' => 'Selesai', 'selesai_pada' => now()]);
+
+                            // If direktur creates disposition, mark as Signed
+                            if (auth()->user()->hasRole('direktur')) {
+                                $statusSigned = \App\Models\StatusSurat::where('nama', 'Signed')->first();
+                                if ($statusSigned) {
+                                    $record->update(['status_surat_id' => $statusSigned->id, 'status' => 'Selesai']);
+                                }
+                            }
+                            
                             \Filament\Notifications\Notification::make()
                                 ->title('Disposisi Berhasil Dibuat')
                                 ->success()
                                 ->send();
+                        }),
+                    Tables\Actions\Action::make('bagikan_disposisi')
+                        ->label('Bagikan')
+                        ->icon('heroicon-o-share')
+                        ->color('info')
+                        ->visible(fn ($record) => auth()->user()->hasRole('sekretaris') && $record->disposisis()->exists())
+                        ->form([
+                            Forms\Components\Select::make('kepada_user_ids')
+                                ->label('Bagikan Ke')
+                                ->options(fn () => \App\Models\User::pluck('name', 'id'))
+                                ->multiple()
+                                ->searchable()
+                                ->required(),
+                            Forms\Components\Textarea::make('instruksi')
+                                ->label('Instruksi Tambahan')
+                                ->required(),
+                        ])
+                        ->action(function (SuratMasuk $record, array $data) {
+                            foreach ($data['kepada_user_ids'] as $kepadaUserId) {
+                                $record->disposisis()->create([
+                                    'dari_user_id' => auth()->id(),
+                                    'kepada_user_id' => $kepadaUserId,
+                                    'instruksi' => $data['instruksi'],
+                                    'prioritas' => 'Biasa',
+                                    'status' => 'Pending',
+                                ]);
+                            }
+                            \Filament\Notifications\Notification::make()
+                                ->title('Disposisi Berhasil Dibagikan')
+                                ->success()
+                                ->send();
+                        }),
+                    Tables\Actions\Action::make('selesaikan')
+                        ->label('Selesaikan')
+                        ->icon('heroicon-o-check-badge')
+                        ->color('success')
+                        ->visible(fn ($record) => auth()->user()->hasRole('sekretaris') && $record->disposisis()->exists() && $record->status !== 'Selesai')
+                        ->requiresConfirmation()
+                        ->action(function (SuratMasuk $record) {
+                            $record->update(['status' => 'Selesai']);
+                            \Filament\Notifications\Notification::make()
+                                ->title('Surat Telah Diselesaikan')
+                                ->success()
+                                ->send();
+                        }),
+                    Tables\Actions\Action::make('cetak_disposisi')
+                        ->label('Cetak Disposisi')
+                        ->icon('heroicon-o-printer')
+                        ->color('secondary')
+                        ->visible(fn ($record) => $record->disposisis()->exists())
+                        ->action(function (SuratMasuk $record) {
+                            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.disposisi-all', [
+                                'suratMasuk' => $record->load('disposisis.dariUser', 'disposisis.kepadaUser')
+                            ]);
+                            return response()->streamDownload(function () use ($pdf) {
+                                echo $pdf->output();
+                            }, 'disposisi-' . str_replace(['/', '\\'], '-', $record->nomor_agenda) . '.pdf');
                         }),
                     Tables\Actions\Action::make('buat_jadwal')
                         ->label('Buat Jadwal (Planer)')
@@ -400,8 +556,11 @@ class SuratMasukResource extends Resource
                 \Filament\Infolists\Components\Section::make('Informasi Surat')
                     ->schema([
                         \Filament\Infolists\Components\TextEntry::make('nomor_surat'),
-                        \Filament\Infolists\Components\TextEntry::make('nomor_agenda'),
+                        \Filament\Infolists\Components\TextEntry::make('nomor_agenda')
+                            ->label('Nomor Registrasi'),
                         \Filament\Infolists\Components\TextEntry::make('pengirim'),
+                        \Filament\Infolists\Components\TextEntry::make('tujuanUser.name')
+                            ->label('Tujuan'),
                         \Filament\Infolists\Components\TextEntry::make('perihal'),
                         \Filament\Infolists\Components\TextEntry::make('tanggal_diterima')->date('d M Y'),
                         \Filament\Infolists\Components\TextEntry::make('sifat')
@@ -416,12 +575,20 @@ class SuratMasukResource extends Resource
                             ->columnSpanFull(),
                     ])->columns(2),
                 
-                \Filament\Infolists\Components\Section::make('Timeline & Disposisi')
+                 \Filament\Infolists\Components\Section::make('Timeline & Disposisi')
                     ->schema([
                          \Filament\Infolists\Components\ViewEntry::make('timeline')
                             ->view('filament.surat-timeline')
                             ->columnSpanFull(),
                     ]),
+
+                \Filament\Infolists\Components\Section::make('Lampiran File')
+                    ->schema([
+                        \Filament\Infolists\Components\ViewEntry::make('file_path')
+                            ->view('filament.infolists.pdf-viewer')
+                            ->columnSpanFull(),
+                    ])
+                    ->visible(fn ($record) => $record->file_path && str_ends_with(strtolower($record->file_path), '.pdf')),
 
                 \Filament\Infolists\Components\Section::make('Daftar Disposisi')
                     ->schema([

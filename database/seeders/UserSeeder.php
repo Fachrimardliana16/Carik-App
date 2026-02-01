@@ -34,6 +34,7 @@ class UserSeeder extends Seeder
         $roleKabag = Role::create(['name' => 'kepala_bagian', 'guard_name' => 'web', 'panel_access' => ['app']]);
         $roleKasubbag = Role::create(['name' => 'kepala_sub_bagian', 'guard_name' => 'web', 'panel_access' => ['app']]);
         $roleStaff = Role::create(['name' => 'staff', 'guard_name' => 'web', 'panel_access' => ['app']]);
+        $roleDirektur = Role::create(['name' => 'direktur', 'guard_name' => 'web', 'panel_access' => ['app']]);
 
         $password = Hash::make('password');
 
@@ -43,6 +44,7 @@ class UserSeeder extends Seeder
         // 3. Seed Admin Role Users
         $this->createUser('Admin', 'admin', 'admin@mail.com', 'admin', $password);
         $this->createUser('Sekretaris', 'sekretaris', 'sekretaris@mail.com', 'admin', $password);
+        $this->createUser('Direktur Utama', 'dirut', 'dirut@mail.com', 'direktur', $password);
 
         // 4. Seed Kepala Bagian (4 users)
         for ($i = 1; $i <= 4; $i++) {
@@ -64,6 +66,7 @@ class UserSeeder extends Seeder
             $roleKabag->syncPermissions($permissions);
             $roleKasubbag->syncPermissions($permissions);
             $roleStaff->syncPermissions($permissions);
+            $roleDirektur->syncPermissions($permissions);
         }
 
         // 7. Seed Staff (4 users)

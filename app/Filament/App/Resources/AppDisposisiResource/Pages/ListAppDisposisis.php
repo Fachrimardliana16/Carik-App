@@ -16,4 +16,11 @@ class ListAppDisposisis extends ListRecords
             Actions\CreateAction::make(),
         ];
     }
+
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            \App\Filament\Resources\DisposisiResource\Widgets\DisposisiStats::class,
+        ];
+    }
 }

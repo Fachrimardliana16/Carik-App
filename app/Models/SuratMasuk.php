@@ -18,6 +18,7 @@ class SuratMasuk extends Model
         'tanggal_surat',
         'tanggal_diterima',
         'pengirim',
+        'tujuan_user_id',
         'perihal',
         'sifat',
         'status',
@@ -38,6 +39,11 @@ class SuratMasuk extends Model
             ->logOnly(['nomor_surat', 'status', 'perihal'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
+    }
+
+    public function tujuanUser()
+    {
+        return $this->belongsTo(User::class, 'tujuan_user_id');
     }
 
     public function disposisis()

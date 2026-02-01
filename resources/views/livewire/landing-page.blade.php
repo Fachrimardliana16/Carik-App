@@ -176,32 +176,11 @@
                                 </div>
                                 <div style="background: #f8fafc; border-radius: 10px; padding: 16px; grid-column: span 2;">
                                     <p style="font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 8px 0; font-weight: 600;">Status</p>
-                                    <span style="display: inline-block; padding: 6px 14px; border-radius: 50px; font-size: 13px; font-weight: 700; {{ $resultMasuk->status === 'Archived' ? 'background: #dcfce7; color: #166534;' : 'background: #fef9c3; color: #854d0e;' }}">
-                                        {{ $resultMasuk->status }}
+                                    <span style="display: inline-block; padding: 6px 14px; border-radius: 50px; font-size: 13px; font-weight: 700; {{ ($resultMasuk->statusSurat?->nama === 'Signed' || $resultMasuk->status === 'Signed') ? 'background: #dcfce7; color: #166534;' : 'background: #fee2e2; color: #991b1b;' }}">
+                                        {{ $resultMasuk->statusSurat?->nama ?? $resultMasuk->status }}
                                     </span>
                                 </div>
                             </div>
-                            @if($resultMasuk->disposisis->count() > 0)
-                                <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid #e2e8f0;">
-                                    <h4 style="font-size: 14px; font-weight: 700; color: #1e293b; margin: 0 0 16px 0;">Riwayat Disposisi</h4>
-                                    <div style="display: flex; flex-direction: column; gap: 12px;">
-                                        @foreach($resultMasuk->disposisis->sortByDesc('created_at') as $item)
-                                            <div style="display: flex; align-items: flex-start; gap: 12px; background: #f8fafc; border-radius: 10px; padding: 14px;">
-                                                <div style="width: 32px; height: 32px; background: #0377fc; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                                                    <svg style="width: 16px; height: 16px; color: white;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
-                                                    </svg>
-                                                </div>
-                                                <div style="flex: 1; min-width: 0;">
-                                                    <p style="font-size: 14px; font-weight: 600; color: #1e293b; margin: 0;">{{ $item->kepadaUser?->name ?? 'Unit' }}</p>
-                                                    <p style="font-size: 13px; color: #64748b; margin: 4px 0 0 0;">{{ $item->catatan ?? '-' }}</p>
-                                                </div>
-                                                <p style="font-size: 12px; color: #94a3b8; white-space: nowrap; margin: 0;">{{ $item->created_at->format('d M Y H:i') }}</p>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                </div>
-                            @endif
                         </div>
                     </div>
                 @elseif($resultKeluar)

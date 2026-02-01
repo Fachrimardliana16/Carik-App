@@ -8,6 +8,9 @@ use App\Livewire\PublicSuratMasuk;
 
 Route::get('/', LandingPage::class);
 Route::get('/input-surat-masuk', PublicSuratMasuk::class)->name('public.surat-masuk');
+Route::get('/login', function () {
+    return redirect('/app/login');
+})->name('login');
 
 Route::get('/validate/{code}', [ValidationController::class, 'validateDocument'])->name('val.document');
 

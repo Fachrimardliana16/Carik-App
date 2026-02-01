@@ -10,6 +10,15 @@ use Illuminate\Validation\ValidationException;
 
 class Login extends BaseLogin
 {
+    public function mount(): void
+    {
+        parent::mount();
+        
+        if (session()->has('url.intended')) {
+            session()->forget('url.intended');
+        }
+    }
+
     public function form(Form $form): Form
     {
         return $form
@@ -37,6 +46,17 @@ class Login extends BaseLogin
             'username' => $data['username'],
             'password' => $data['password'],
         ];
+    }
+
+    protected function getRedirectUrl(): string
+    {
+        $user = auth()->user();
+
+        if ($user->hasAnyRole(['super_admin', 'admin'])) {
+            return url('/admin');
+        }
+
+        return url('/app');
     }
 
     protected function throwFailureValidationException(): never

@@ -16,4 +16,11 @@ class ListAppSuratKeluars extends ListRecords
             Actions\CreateAction::make(),
         ];
     }
+
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            \App\Filament\Resources\SuratKeluarResource\Widgets\SuratKeluarStats::class,
+        ];
+    }
 }

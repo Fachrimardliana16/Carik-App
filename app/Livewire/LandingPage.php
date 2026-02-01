@@ -42,7 +42,7 @@ class LandingPage extends Component
             return;
         }
 
-        $this->resultMasuk = SuratMasuk::with(['disposisis.tujuanUser', 'statusSurat'])
+        $this->resultMasuk = SuratMasuk::with(['disposisis.kepadaUser', 'disposisis.dariUser', 'statusSurat', 'tujuanUser'])
             ->where('nomor_surat', 'like', "%{$this->search}%")
             ->orWhere('nomor_agenda', 'like', "%{$this->search}%")
             ->first();

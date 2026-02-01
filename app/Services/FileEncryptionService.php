@@ -13,10 +13,41 @@ class FileEncryptionService
      */
     public static function encryptAndStore(UploadedFile $file, string $directory): string
     {
-        $content = file_get_contents($file->getRealPath());
-        $encryptedContent = Crypt::encrypt($content);
-        
+        $realPath = $file->getRealPath();
+        $mimeType = $file->getMimeType();
         $filename = $file->hashName();
+        
+        // Handle Image Optimization/Conversion to WebP
+        if (str_starts_with($mimeType, 'image/') && in_array($mimeType, ['image/jpeg', 'image/png', 'image/jpg'])) {
+            $image = null;
+            if ($mimeType === 'image/jpeg' || $mimeType === 'image/jpg') {
+                $image = imagecreatefromjpeg($realPath);
+            } elseif ($mimeType === 'image/png') {
+                $image = imagecreatefrompng($realPath);
+                imagepalettetotruecolor($image);
+                imagealphablending($image, true);
+                imagesavealpha($image, true);
+            }
+
+            if ($image) {
+                $tempPath = tempnam(sys_get_temp_dir(), 'webp');
+                imagewebp($image, $tempPath, 80); // 80 quality
+                imagedestroy($image);
+                
+                $content = file_get_contents($tempPath);
+                unlink($tempPath);
+                
+                // Change extension to webp for the hash name if we want, 
+                // but hashName is already random. Let's just keep it or adjust it.
+                $filename = pathinfo($filename, PATHINFO_FILENAME) . '.webp';
+            } else {
+                $content = file_get_contents($realPath);
+            }
+        } else {
+            $content = file_get_contents($realPath);
+        }
+
+        $encryptedContent = Crypt::encrypt($content);
         $path = $directory . '/' . $filename;
         
         Storage::put($path, $encryptedContent);

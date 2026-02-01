@@ -20,13 +20,13 @@ class AppSuratMasukResource extends SuratMasukResource
         $user = Auth::user();
         return parent::getEloquentQuery()
             ->where(function (Builder $query) use ($user) {
-                // Show letters where creation is by user, OR user is involved (e.g. through dispositions - simpler logic for now: all visible or limited?)
-                // "Filter datanya saja per user"
-                // Assuming "Surat Masuk" for a Unit user means letters *dispositioned* to them, OR created by them (if they can create).
-                // But SuratMasuk is typically "General Box". 
-                // Let's filter by: Has a disposition to this user.
+                // Show letters where:
+                // 1. Created by this user, OR
+                // 2. Addressed to this user (tujuan), OR
+                // 3. Has a disposition to this user
                 
                 $query->where('created_by', $user->id)
+                      ->orWhere('tujuan_user_id', $user->id)
                       ->orWhereHas('disposisis', function ($q) use ($user) {
                           $q->where('kepada_user_id', $user->id);
                       });

@@ -3,9 +3,9 @@
     <ol class="relative border-l border-gray-200 dark:border-gray-700">                  
         {{-- Status Surat Masuk Awal --}}
         <li class="mb-10 ml-6">            
-            <span class="absolute flex items-center justify-center w-6 h-6 bg-blue-100 rounded-full -left-3 ring-8 ring-white dark:ring-gray-900 dark:bg-blue-900">
+            <!-- <span class="absolute flex items-center justify-center w-6 h-6 bg-blue-100 rounded-full -left-3 ring-8 ring-white dark:ring-gray-900 dark:bg-blue-900">
                 <svg class="w-3 h-3 text-blue-800 dark:text-blue-300" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path></svg>
-            </span>
+            </span> -->
             <h3 class="flex items-center mb-1 text-lg font-semibold text-gray-900 dark:text-white">
                 Surat Diterima / Dicatat
                 <span class="bg-blue-100 text-blue-800 text-sm font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300 ml-3">Start</span>
@@ -22,9 +22,9 @@
         {{-- Loop Disposisi --}}
         @foreach($getRecord()->disposisis->sortBy('created_at') as $dispo)
         <li class="mb-10 ml-6">
-            <span class="absolute flex items-center justify-center w-6 h-6 bg-yellow-100 rounded-full -left-3 ring-8 ring-white dark:ring-gray-900 dark:bg-yellow-900">
+            <!-- <span class="absolute flex items-center justify-center w-6 h-6 bg-yellow-100 rounded-full -left-3 ring-8 ring-white dark:ring-gray-900 dark:bg-yellow-900">
                  <svg class="w-3 h-3 text-yellow-800 dark:text-yellow-300" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 00-1 1v1a1 1 0 002 0V3a1 1 0 00-1-1zM4 4h3a3 3 0 006 0h3a2 2 0 012 2v9a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2zm2.5 7a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm2.45 4a2.5 2.5 0 10-4.9 0h4.9zM12 9a1 1 0 100 2h3a1 1 0 100-2h-3zm-1 4a1 1 0 011-1h2a1 1 0 110 2h-2a1 1 0 01-1-1z" /></svg>
-            </span>
+            </span> -->
             <h3 class="mb-1 text-lg font-semibold text-gray-900 dark:text-white">
                 Disposisi ke: {{ $dispo->kepadaUser->name }}
             </h3>
@@ -38,7 +38,7 @@
                     </time>
                     <div class="text-sm font-normal text-gray-500 lex dark:text-gray-300">Dari: {{ $dispo->dariUser->name }}</div>
                 </div>
-                <div class="p-3 text-xs italic font-normal text-gray-500 border border-gray-200 rounded-lg bg-gray-50 dark:bg-gray-600 dark:border-gray-500 dark:text-gray-300">
+                <div class="p-3 text-xs italic font-normal text-gray-500 border border-gray-200 rounded-lg bg-gray-50 dark:bg-gray-600 dark:border-gray-500 dark:text-gray-300 break-words">
                     "{!! $dispo->instruksi !!}"
                 </div>
                 

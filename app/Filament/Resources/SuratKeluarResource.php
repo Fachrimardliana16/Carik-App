@@ -27,6 +27,16 @@ class SuratKeluarResource extends Resource
     
     protected static ?int $navigationSort = 2;
 
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::whereHas('statusSurat', fn ($q) => $q->whereIn('nama', ['Draft', 'Review']))->count() ?: null;
+    }
+
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return 'warning';
+    }
+
     public static function form(Form $form): Form
     {
         return $form
